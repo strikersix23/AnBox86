@@ -10,12 +10,13 @@
 
 function run_Main()
 {
-	rm AnBox86.sh # self-destruct (since this script should only be run once)
+	rm -f AnBox86.sh # sliently self-destruct (since this script should only be run once) just in case the user ran this script by downloading it
 	
         # Enable left & right keys in Termux (optional) - https://www.learntermux.tech/2020/01/how-to-enable-extra-keys-in-termux.html
 	mkdir $HOME/.termux/
 	echo "extra-keys = [['ESC','/','-','HOME','UP','END'],['TAB','CTRL','ALT','LEFT','DOWN','RIGHT']]" >> $HOME/.termux/termux.properties
 	termux-reload-settings
+	termux-setup-storage # So we can access the sd card
 	
 	# Update Termux source lists (just in case Termux was downloaded from Google Play Store instead of from F-Droid)
 	#  - Termux source list mirrors are located here: https://github.com/termux/termux-app#google-playstore-deprecated
@@ -33,25 +34,34 @@ function run_Main()
 	# Create a script to start XServerXSDL and log into PRoot as the 'user' account (which we will create later)
 	echo >> Start_AnBox86.sh "#!/bin/bash"
 	echo >> Start_AnBox86.sh ""
-	echo >> Start_AnBox86.sh "am start --user 0 -n x.org.server/x.org.server.RunFromOtherApp"
-	echo >> Start_AnBox86.sh ""
+	echo >> Start_AnBox86.sh "# Launch the XServer XSDL Android app from Termux. The rest of these commands will run in Termux in the background."
+	echo >> Start_AnBox86.sh "am start --user 0 -n x.org.server/x.org.server.RunFromOtherApp # Launch the XServerXSDL android app"
 	echo >> Start_AnBox86.sh "sleep 7s"
 	echo >> Start_AnBox86.sh ""
 	echo >> Start_AnBox86.sh "export PATH=$HOME/proot-static/bin:$PATH"
-	echo >> Start_AnBox86.sh ""
 	echo >> Start_AnBox86.sh "export PROOT_LOADER=$HOME/proot-static/bin/loader"
 	echo >> Start_AnBox86.sh ""
-	echo >> Start_AnBox86.sh "proot-distro login --bind /sdcard --isolated ubuntu-20.04 -- su - user" # '--isolated' avoids program conflicts between Termux & PRoot (credits: Mipster)
+	echo >> Start_AnBox86.sh "# Automatically start Box86 and Wine Desktop from within the Termux user account"
+	echo >> Start_AnBox86.sh "proot-distro login --bind $HOME/storage/external-1:/external-storage --bind /sdcard:/internal-storage --isolated ubuntu-20.04 --user user -- <<- 'EOC'" # TODO: Fix me
+	echo >> Start_AnBox86.sh "	export DISPLAY=localhost:0"
+	echo >> Start_AnBox86.sh "	sudo Xephyr :1 -noreset -fullscreen &"
+	echo >> Start_AnBox86.sh "	DISPLAY=:1 box86 ~/wine/bin/wine explorer /desktop=wine,1280x720 explorer"
+	echo >> Start_AnBox86.sh "EOC"
+	#echo >> Start_AnBox86.sh "proot-distro login --bind /sdcard ubuntu-20.04 --user user -- DISPLAY=:1 box86 $PREFIX/var/lib/proot-distro/installed-rootfs/ubuntu-20.04/home/user/wine/bin/wine explorer /desktop=wine,1280x720 explorer"
 	chmod +x Start_AnBox86.sh
+	# proot-distro notes: '--bind' lets users access some Termux directories from inside PRoot: $HOME/storage/external-1 for external and in most cases, /sdcard for internal.
+	#                          Note that we must bind '$HOME/storage/external-1' instead of '/storage' (since binding '/storage' results in read-only access to the external SD card and a different directory layout)
+	#                     '--isolated' avoids program conflicts between Termux & PRoot (credits: Mipster)
+	#                     '--user' logs into a user account
+	#                     ' -- COMMANDS-HERE' lets us inject commands into the PRoot distro from Termux
 	
 	# Create a script to log into PRoot as the 'user' account (which we will create later)
 	echo >> launch_ubuntu.sh "#!/bin/bash"
 	echo >> launch_ubuntu.sh ""
 	echo >> launch_ubuntu.sh "export PATH=$HOME/proot-static/bin:$PATH"
-	echo >> launch_ubuntu.sh ""
 	echo >> launch_ubuntu.sh "export PROOT_LOADER=$HOME/proot-static/bin/loader"
 	echo >> launch_ubuntu.sh ""
-	echo >> launch_ubuntu.sh "proot-distro login --bind /sdcard --isolated ubuntu-20.04 -- su - user" # '--isolated' avoids program conflicts between Termux & PRoot (credits: Mipster)
+	echo >> launch_ubuntu.sh "proot-distro login --bind $HOME/storage/external-1 --bind /sdcard --isolated ubuntu-20.04 -- su - user"
 	chmod +x launch_ubuntu.sh
 	
 	# Inject a 'second stage' installer script into Ubuntu
@@ -63,6 +73,7 @@ function run_Main()
 	export PATH=$HOME/proot-static/bin:$PATH
 	export PROOT_LOADER=$HOME/proot-static/bin/loader
 	proot-distro login --isolated ubuntu-20.04 # Log into the Ubuntu PRoot as 'root'.
+	# Since we are planning to run this script from Termux using curl, when all scripts are finished, we will return to Termux.
 }
 
 # ---------------
@@ -97,6 +108,7 @@ function run_InjectSecondStageInstaller()
 			sudo apt install git cmake python3 build-essential gcc -y # box86 dependencies
 			git clone https://github.com/ptitSeb/box86
 			sh -c "cd box86 && cmake .. -DARM_DYNAREC=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo ~/box86 && make && make install"
+			rm -rf box86 # remove box86 build directory
 			
 			# Install i386-Wine
 			sudo apt install wget -y
@@ -110,10 +122,17 @@ function run_InjectSecondStageInstaller()
 			echo -e >> ~/.bashrc "\n# Initialize X server every time user logs in"
 			echo >> ~/.bashrc "export DISPLAY=localhost:0"
 			echo >> ~/.bashrc "sudo Xephyr :1 -noreset -fullscreen &"
-			
-			# Automatically start Box86 and Wine when the user logs in
-			echo >> ~/.bashrc "# start Box86 and Wine"
-			echo >> ~/.bashrc "DISPLAY=:1 box86 ~/wine/bin/wine explorer /desktop=wine,1280x720 explorer"
+			echo >> ~/.bashrc ""
+			echo >> ~/.bashrc "# Print some instructions for the user every time they log in"
+			echo >> ~/.bashrc "clear"
+			echo >> ~/.bashrc "echo ''"
+			echo >> ~/.bashrc "echo 'Welcome to PRoot with Box86 & Wine!'"
+			echo >> ~/.bashrc "echo \" - Launch x86 programs with 'wine YourWindowsProgram.exe' or 'box86 YourLinuxProgram'.\""
+			echo >> ~/.bashrc "echo \"    (don't forget to use the BOX86_NOBANNER=1 environment variable when launching winetricks)\""
+			echo >> ~/.bashrc "echo ''"
+			echo >> ~/.bashrc "echo \" - After launching a program, use the Android app 'XServer XSDL' to view & control it.\""
+			echo >> ~/.bashrc "echo \"    (if you get display errors, make sure Android didn't put the 'XServer XSDL' app to sleep)\""
+			echo >> ~/.bashrc "echo \" - The SD Card is accessable from \/sdcard\""
 			
 			# Make scripts and symlinks to transparently run wine with box86 (since we don't have binfmt_misc available)
 			echo -e '#!/bin/bash'"\nDISPLAY=:1 setarch linux32 -L box86 $HOME/wine/bin/wine" '"$@"' | sudo tee -a /usr/local/bin/wine >/dev/null
@@ -129,17 +148,10 @@ function run_InjectSecondStageInstaller()
 			sudo mv winetricks /usr/local/bin
 			
 			echo -e "\nAnBox86 installation complete."
-			echo " - From Termux, you can use Start_AnBox86.sh to start Box86 and Wine."
-			echo " - From Termux, you can also use launch_ubuntu.sh to login to user account"
-			echo "    (we are currently inside Ubuntu PRoot in a user account)"
-			echo " - Launch x86 programs from inside PRoot with 'wine YourWindowsProgram.exe' or 'box86 YourLinuxProgram'."
-			echo "    (don't forget to use the BOX86_NOBANNER=1 environment variable when launching winetricks)"
-			echo " - After PRoot launches a program, use the Android app 'XServer XSDL' to view & control it."
-			echo "    (if you get display errors, make sure Android didn't put the 'XServer XSDL' app to sleep)"
+			echo " - Start Wine Desktop with Start_AnBox86.sh."
+			echo " - You can also run wine and winetricks from commandline inside PRoot. Log in with launch_ubuntu.sh"
 		EOT
 		# The above commands were pushed into the 'user' account while we were in 'root'. So now that these commands are done, we will still be in 'root'.
-		# Let's tell bash to log into the 'user' account as our final action.
-		sudo su - user
 	EOM
 	# The above commands will be run in the future upon login to Ubuntu PRoot as 'root' ('user' doesn't exist yet).
 }
