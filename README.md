@@ -4,14 +4,13 @@ A set of scripts to install box86 and wine on a termux proot for arm64 devices.
 
 # Instructions
 
-1- Install Termux (FROM F-DROID) https://f-droid.org/en/packages/com.termux/
+1- Install [Termux](https://f-droid.org/en/packages/com.termux/) for Android (FROM F-DROID)
 
-2- Copy/paste these commands into Termux
+2- Install [XServer XSDL](https://play.google.com/store/apps/details?id=x.org.server) for Android
+
+3- Copy/paste these commands into Termux
 ```bash
-pkg update -y; pkg install wget -y  < "/dev/null"
-
-wget https://raw.githubusercontent.com/lowspecman420/AnBox86/main/AnBox86.sh && \
-    bash AnBox86.sh
+curl https://raw.githubusercontent.com/lowspecman420/AnBox86/main/AnBox86.sh | bash AnBox86.sh
 ```
 
 # Projects used
