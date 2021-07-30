@@ -9,9 +9,7 @@
 #
 
 function run_Main()
-{
-	rm AnBox86_64.sh # self-destruct (since this script should only be run once)
-	
+{	
         # Enable left & right keys in Termux (optional) - https://www.learntermux.tech/2020/01/how-to-enable-extra-keys-in-termux.html
 	mkdir $HOME/.termux/
 	echo "extra-keys = [['ESC','/','-','HOME','UP','END'],['TAB','CTRL','ALT','LEFT','DOWN','RIGHT']]" >> $HOME/.termux/termux.properties
@@ -73,10 +71,10 @@ function run_InjectSecondStageInstaller()
 			sudo dpkg-reconfigure --frontend noninteractive tzdata
 			
 			# Build and install Box64
-			sudo apt install git cmake python3 build-essential gcc -y # box64 dependencies
-			git clone https://github.com/ptitSeb/box64
-			sh -c "cd box64 && mkdir build; cd build; cmake .. -DARM_DYNAREC=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo; make && make install"
-			sudo rm -rf box64
+			#sudo apt install git cmake python3 build-essential gcc -y # box64 dependencies
+			#git clone https://github.com/ptitSeb/box64
+			#sh -c "cd box64 && mkdir build; cd build; cmake .. -DARM_DYNAREC=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo; make && make install"
+			#sudo rm -rf box64
 			
 			# Build and install Box86 (for aarch64)
 			sudo dpkg --add-architecture armhf && sudo apt update
@@ -95,12 +93,12 @@ function run_InjectSecondStageInstaller()
 			# Install amd64-Wine (also installs x86 wine binary)
 			sudo apt install wget -y
 			sudo apt install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 -y # for wine on proot?
-			wget https://www.playonlinux.com/wine/binaries/phoenicis/upstream-linux-amd64/PlayOnLinux-wine-6.0-upstream-linux-amd64.tar.gz
-			mkdir wine && tar -xvf PlayOnLinux-wine-6.0-upstream-linux-amd64.tar.gz -C wine
-			rm PlayOnLinux-wine-6.0-upstream-linux-amd64.tar.gz
-			#wget https://twisteros.com/wine.tgz
-			#tar -xvzf wine.tgz
-			#rm wine.tgz
+			#wget https://www.playonlinux.com/wine/binaries/phoenicis/upstream-linux-amd64/PlayOnLinux-wine-6.0-upstream-linux-amd64.tar.gz
+			#mkdir wine && tar -xvf PlayOnLinux-wine-6.0-upstream-linux-amd64.tar.gz -C wine
+			#rm PlayOnLinux-wine-6.0-upstream-linux-amd64.tar.gz
+			wget https://twisteros.com/wine.tgz
+			tar -xvzf wine.tgz
+			rm wine.tgz
 			
 			# Give PRoot an X server ('screen 1') to send video to (and don't stop the X server after last client logs off)
 			sudo apt install xserver-xephyr -y
@@ -109,12 +107,12 @@ function run_InjectSecondStageInstaller()
 			echo >> ~/.bashrc "sudo Xephyr :1 -noreset -fullscreen &"
 			
 			# Make scripts and symlinks to transparently run wine with box86 (since we don't have binfmt_misc available)
-			echo -e '#!/bin/bash'"\nDISPLAY=:1 box64 $HOME/wine/bin/wine64" '"$@"' | sudo tee -a /usr/local/bin/wine64 >/dev/null
+			#echo -e '#!/bin/bash'"\nDISPLAY=:1 box64 $HOME/wine/bin/wine64" '"$@"' | sudo tee -a /usr/local/bin/wine64 >/dev/null
 			echo -e '#!/bin/bash'"\nDISPLAY=:1 box86 $HOME/wine/bin/wine" '"$@"' | sudo tee -a /usr/local/bin/wine >/dev/null
-			echo -e '#!/bin/bash'"\nbox64 $HOME/wine/bin/wineserver" '"$@"' | sudo tee -a /usr/local/bin/wineserver >/dev/null
+			echo -e '#!/bin/bash'"\nbox86 $HOME/wine/bin/wineserver" '"$@"' | sudo tee -a /usr/local/bin/wineserver >/dev/null
 			sudo ln -s $HOME/wine/bin/wineboot /usr/local/bin/wineboot
 			sudo ln -s $HOME/wine/bin/winecfg /usr/local/bin/winecfg
-			sudo chmod +x /usr/local/bin/wine64 /usr/local/bin/wine /usr/local/bin/wineboot /usr/local/bin/winecfg /usr/local/bin/wineserver
+			sudo chmod +x /usr/local/bin/wine /usr/local/bin/wineboot /usr/local/bin/winecfg /usr/local/bin/wineserver
 			
 			# Install winetricks
 			sudo apt-get install wget cabextract -y # winetricks needs this
