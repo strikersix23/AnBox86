@@ -20,7 +20,7 @@ function run_Main()
 	echo "deb https://termux.mentality.rip/termux-main stable main" > $PREFIX/etc/apt/sources.list 
 	echo "deb https://termux.mentality.rip/termux-games games stable" > $PREFIX/etc/apt/sources.list.d/game.list
 	echo "deb https://termux.mentality.rip/termux-science science stable" > $PREFIX/etc/apt/sources.list.d/science.list
-	apt update && apt upgrade -y -o Dpkg::Options::=--force-confnew # upgrade Termux and suppress user prompts
+	pkg update && pkg upgrade -y -o Dpkg::Options::=--force-confnew # upgrade Termux and suppress user prompts # TODO: Untested
 	pkg upgrade -y # TODO: not sure if I need this
 	
 	# Create the Ubuntu PRoot within Termux
