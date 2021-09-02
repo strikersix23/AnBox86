@@ -91,9 +91,7 @@ function run_InjectSecondStageInstaller()
 		#  - Upon first PRoot login, bash will load these commands into memory, delete this script file, then run the rest of the commands.
 		rm /etc/profile.d/AnBox86b.sh
 		
-		apt update -y
-		apt update -y
-		pause
+		#apt update -y # Broken somehow? as of 9/2/2021
 		
 		# Create a user account within PRoot & install Wine into it (best practices are to not run Wine as root).
 		#  - We are currently in PRoot's 'root'.  To run commands within a 'user' account, we must push them into 'user' using heredoc.
