@@ -16,7 +16,7 @@ function run_Main()
 	mkdir $HOME/.termux/
 	echo "extra-keys = [['ESC','/','-','HOME','UP','END'],['TAB','CTRL','ALT','LEFT','DOWN','RIGHT']]" >> $HOME/.termux/termux.properties
 	termux-reload-settings
-	termux-setup-storage # So we can access the sd card
+	#termux-setup-storage # So we can access the sd card
 	
 	# Update Termux source lists (just in case Termux was downloaded from Google Play Store instead of from F-Droid)
 	#  - Termux source list mirrors are located here: https://github.com/termux/termux-app#google-playstore-deprecated
@@ -91,7 +91,7 @@ function run_InjectSecondStageInstaller()
 		#  - Upon first PRoot login, bash will load these commands into memory, delete this script file, then run the rest of the commands.
 		rm /etc/profile.d/AnBox86b.sh
 		
-		#apt update -y # Broken somehow? as of 9/2/2021
+		apt update -y # Broken somehow? as of 9/2/2021
 		
 		# Create a user account within PRoot & install Wine into it (best practices are to not run Wine as root).
 		#  - We are currently in PRoot's 'root'.  To run commands within a 'user' account, we must push them into 'user' using heredoc.
