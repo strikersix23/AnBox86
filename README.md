@@ -10,7 +10,7 @@ A set of scripts to install box86 and wine on a termux proot for arm64 devices.
 
 3- Copy/paste these commands into Termux
 ```bash
-curl https://raw.githubusercontent.com/lowspecman420/AnBox86/main/AnBox86.sh | bash
+curl https://raw.githubusercontent.com/WheezyE/AnBox86/main/AnBox86.sh | bash
 ```
 
 # Projects used
