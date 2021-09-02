@@ -28,7 +28,7 @@ function run_Main()
 	# Create the Ubuntu PRoot within Termux
 	# - And initialize paths for our Termux shell instance (also add them to .bashrc for future Termux shell instances)
 	pkg install proot-distro git -y
-	linux32 proot-distro install ubuntu-20.04
+	linux32 proot-distro install ubuntu
 	git clone https://github.com/ZhymabekRoman/proot-static # Use a 32bit PRoot instead of 64bit
 	
 	# Create a script to start XServerXSDL and log into PRoot as the 'user' account (which we will create later)
@@ -42,12 +42,12 @@ function run_Main()
 	echo >> Start_AnBox86.sh "export PROOT_LOADER=$HOME/proot-static/bin/loader"
 	echo >> Start_AnBox86.sh ""
 	echo >> Start_AnBox86.sh "# Automatically start Box86 and Wine Desktop from within the Termux user account"
-	echo >> Start_AnBox86.sh "proot-distro login --bind $HOME/storage/external-1:/external-storage --bind /sdcard:/internal-storage --isolated ubuntu-20.04 --user user -- <<- 'EOC'" # TODO: Fix me
+	echo >> Start_AnBox86.sh "proot-distro login --bind $HOME/storage/external-1:/external-storage --bind /sdcard:/internal-storage --isolated ubuntu --user user -- <<- 'EOC'" # TODO: Fix me
 	echo >> Start_AnBox86.sh "	export DISPLAY=localhost:0"
 	echo >> Start_AnBox86.sh "	sudo Xephyr :1 -noreset -fullscreen &"
 	echo >> Start_AnBox86.sh "	DISPLAY=:1 box86 ~/wine/bin/wine explorer /desktop=wine,1280x720 explorer"
 	echo >> Start_AnBox86.sh "EOC"
-	#echo >> Start_AnBox86.sh "proot-distro login --bind /sdcard ubuntu-20.04 --user user -- DISPLAY=:1 box86 $PREFIX/var/lib/proot-distro/installed-rootfs/ubuntu-20.04/home/user/wine/bin/wine explorer /desktop=wine,1280x720 explorer"
+	#echo >> Start_AnBox86.sh "proot-distro login --bind /sdcard ubuntu --user user -- DISPLAY=:1 box86 $PREFIX/var/lib/proot-distro/installed-rootfs/ubuntu/home/user/wine/bin/wine explorer /desktop=wine,1280x720 explorer"
 	chmod +x Start_AnBox86.sh
 	# proot-distro notes: '--bind' lets users access some Termux directories from inside PRoot: $HOME/storage/external-1 for external and in most cases, /sdcard for internal.
 	#                          Note that we must bind '$HOME/storage/external-1' instead of '/storage' (since binding '/storage' results in read-only access to the external SD card and a different directory layout)
@@ -61,7 +61,7 @@ function run_Main()
 	echo >> launch_ubuntu.sh "export PATH=$HOME/proot-static/bin:$PATH"
 	echo >> launch_ubuntu.sh "export PROOT_LOADER=$HOME/proot-static/bin/loader"
 	echo >> launch_ubuntu.sh ""
-	echo >> launch_ubuntu.sh "proot-distro login --bind $HOME/storage/external-1 --bind /sdcard --isolated ubuntu-20.04 -- su - user"
+	echo >> launch_ubuntu.sh "proot-distro login --bind $HOME/storage/external-1 --bind /sdcard --isolated ubuntu -- su - user"
 	chmod +x launch_ubuntu.sh
 	
 	# Inject a 'second stage' installer script into Ubuntu
@@ -72,7 +72,7 @@ function run_Main()
 	echo -e "\nUbunutu PRoot guest system installed. Launching PRoot to continue the installation. . ."
 	export PATH=$HOME/proot-static/bin:$PATH
 	export PROOT_LOADER=$HOME/proot-static/bin/loader
-	proot-distro login --isolated ubuntu-20.04 # Log into the Ubuntu PRoot as 'root'.
+	proot-distro login --isolated ubuntu # Log into the Ubuntu PRoot as 'root'.
 	# Since we are planning to run this script from Termux using curl, when all scripts are finished, we will return to Termux.
 }
 
@@ -81,7 +81,7 @@ function run_Main()
 function run_InjectSecondStageInstaller()
 {
 	# Inject the 'second stage' installer script into the Ubuntu guest system to be run laterb (none of this gets run right now)
-	cat > $PREFIX/var/lib/proot-distro/installed-rootfs/ubuntu-20.04/etc/profile.d/AnBox86b.sh <<- 'EOM'
+	cat > $PREFIX/var/lib/proot-distro/installed-rootfs/ubuntu/etc/profile.d/AnBox86b.sh <<- 'EOM'
 		#!/bin/bash
 		# Second stage installer script
 		#  - Because this script is located within '/etc/profile.d/', bash will auto-run it upon any login into PRoot ('root' or 'user').
