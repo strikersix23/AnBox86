@@ -23,7 +23,7 @@ function run_Main()
 	echo "deb https://termux.mentality.rip/termux-main stable main" > $PREFIX/etc/apt/sources.list 
 	echo "deb https://termux.mentality.rip/termux-games games stable" > $PREFIX/etc/apt/sources.list.d/game.list
 	echo "deb https://termux.mentality.rip/termux-science science stable" > $PREFIX/etc/apt/sources.list.d/science.list
-	pkg update && pkg upgrade -y -o Dpkg::Options::=--force-confnew # upgrade Termux and suppress user prompts # TODO: Test this with pkg instead of apt
+	pkg update -y -o Dpkg::Options::=--force-confnew && pkg upgrade -y -o Dpkg::Options::=--force-confnew # upgrade Termux and suppress user prompts 
 	
 	# Create the Ubuntu PRoot within Termux
 	# - And initialize paths for our Termux shell instance (also add them to .bashrc for future Termux shell instances)
@@ -91,12 +91,13 @@ function run_InjectSecondStageInstaller()
 		#  - Upon first PRoot login, bash will load these commands into memory, delete this script file, then run the rest of the commands.
 		rm /etc/profile.d/AnBox86b.sh
 		
-		apt update -y # Broken somehow? as of 9/2/2021
+		apt update -y
 		
 		# Create a user account within PRoot & install Wine into it (best practices are to not run Wine as root).
 		#  - We are currently in PRoot's 'root'.  To run commands within a 'user' account, we must push them into 'user' using heredoc.
-		adduser --disabled-password --gecos "" user # Make a user account named 'user' without prompting us for information
-		apt install sudo -y && echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers # Give the 'user' account sudo access
+		adduser --disabled-password --gecos "" user #BROKEN # Make a user account named 'user' without prompting us for information
+		apt install sudo -y
+		echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers # Give the 'user' account sudo access
 		sudo su - user <<- 'EOT'
 			# Install a Python3(?) dependency (a box86 compiling dependency) without prompts (prompts will freeze our 'eot' commands)
 			export DEBIAN_FRONTEND=noninteractive
