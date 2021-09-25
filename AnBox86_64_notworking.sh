@@ -91,6 +91,9 @@ function run_InjectSecondStageInstaller()
 				libavformat58:armhf libswscale5:armhf libmyguiengine3debian1v5:armhf libboost-iostreams1.67.0:armhf \
 				libsdl2-mixer-2.0-0:armhf -y # libc6:armhf required. Unsure about the rest but works. Credits: monkaBlyat (Dr. van RockPi) & Itai-Nelken.
 			
+			
+			sudo apt install libc6:armhf libncurses5:armhf libstdc++6:armhf -y #magic command that makes box86 run on aarch64 https://github.com/ptitSeb/box86/issues/465
+			
 			# Install amd64-Wine (also installs x86 wine binary)
 			sudo apt install wget -y
 			sudo apt install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 -y # for wine on proot?
