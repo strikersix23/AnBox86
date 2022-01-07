@@ -28,8 +28,8 @@ function run_Main()
 	# Create the Ubuntu PRoot within Termux
 	# - And initialize paths for our Termux shell instance (also add them to .bashrc for future Termux shell instances)
 	pkg install proot-distro git -y
-	cp $PREFIX/etc/proot-distro/ubuntu.sh $PREFIX/etc/proot-distro/ubuntu-arm.sh
-	# TODO: SED to add DISTRO_ARCH="arm"
+	cp $PREFIX/etc/proot-distro/ubuntu.sh $PREFIX/etc/proot-distro/ubuntu-arm.sh # make a new distro installer script for proot-distro
+	sed -i '/^DISTRO_NAME.*/a DISTRO_ARCH="arm"' $PREFIX/etc/proot-distro/ubuntu-arm.sh # add a new DISTRO_ARCH="arm" flag after DISTRO_NAME.
 	proot-distro install ubuntu-arm
 	git clone https://github.com/ZhymabekRoman/proot-static # Use a 32bit PRoot instead of 64bit
 	
