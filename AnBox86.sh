@@ -28,7 +28,9 @@ function run_Main()
 	# Create the Ubuntu PRoot within Termux
 	# - And initialize paths for our Termux shell instance (also add them to .bashrc for future Termux shell instances)
 	pkg install proot-distro git -y
-	linux32 proot-distro install ubuntu
+	cp $PREFIX/etc/proot-distro/ubuntu.sh $PREFIX/etc/proot-distro/ubuntu-arm.sh # make a new distro installer script for proot-distro
+	sed -i '/^DISTRO_NAME.*/a DISTRO_ARCH="arm"' $PREFIX/etc/proot-distro/ubuntu-arm.sh # add a new DISTRO_ARCH="arm" flag after DISTRO_NAME.
+	proot-distro install ubuntu-arm
 	git clone https://github.com/ZhymabekRoman/proot-static # Use a 32bit PRoot instead of 64bit
 	
 	# Create a script to start XServerXSDL and log into PRoot as the 'user' account (which we will create later)
@@ -42,12 +44,17 @@ function run_Main()
 	echo >> Start_AnBox86.sh "export PROOT_LOADER=$HOME/proot-static/bin/loader"
 	echo >> Start_AnBox86.sh ""
 	echo >> Start_AnBox86.sh "# Automatically start Box86 and Wine Desktop from within the Termux user account"
-	echo >> Start_AnBox86.sh "proot-distro login --bind $HOME/storage/external-1:/external-storage --bind /sdcard:/internal-storage --isolated ubuntu --user user -- <<- 'EOC'" # TODO: Fix me
+	#echo >> Start_AnBox86.sh "proot-distro login --bind $HOME/storage/external-1:/external-storage --bind /sdcard:/internal-storage --isolated ubuntu-arm --user user -- <<- 'EOC'" # TODO: Fix me
+	#echo >> Start_AnBox86.sh "	export DISPLAY=localhost:0"
+	#echo >> Start_AnBox86.sh "	sudo Xephyr :1 -noreset -fullscreen &"
+	#echo >> Start_AnBox86.sh "	DISPLAY=:1 box86 ~/wine/bin/wine explorer /desktop=wine,1280x720 explorer"
+	#echo >> Start_AnBox86.sh "EOC"
+	echo >> Start_AnBox86.sh "proot-distro login --bind $HOME/storage/external-1:/external-storage --bind /sdcard:/internal-storage --isolated ubuntu-arm -- <<- 'EOC'" # TODO: Fix me
 	echo >> Start_AnBox86.sh "	export DISPLAY=localhost:0"
 	echo >> Start_AnBox86.sh "	sudo Xephyr :1 -noreset -fullscreen &"
 	echo >> Start_AnBox86.sh "	DISPLAY=:1 box86 ~/wine/bin/wine explorer /desktop=wine,1280x720 explorer"
 	echo >> Start_AnBox86.sh "EOC"
-	#echo >> Start_AnBox86.sh "proot-distro login --bind /sdcard ubuntu --user user -- DISPLAY=:1 box86 $PREFIX/var/lib/proot-distro/installed-rootfs/ubuntu/home/user/wine/bin/wine explorer /desktop=wine,1280x720 explorer"
+	#echo >> Start_AnBox86.sh "proot-distro login --bind /sdcard ubuntu-arm --user user -- DISPLAY=:1 box86 $PREFIX/var/lib/proot-distro/installed-rootfs/ubuntu-arm/home/user/wine/bin/wine explorer /desktop=wine,1280x720 explorer"
 	chmod +x Start_AnBox86.sh
 	# proot-distro notes: '--bind' lets users access some Termux directories from inside PRoot: $HOME/storage/external-1 for external and in most cases, /sdcard for internal.
 	#                          Note that we must bind '$HOME/storage/external-1' instead of '/storage' (since binding '/storage' results in read-only access to the external SD card and a different directory layout)
@@ -61,8 +68,9 @@ function run_Main()
 	echo >> launch_ubuntu.sh "export PATH=$HOME/proot-static/bin:$PATH"
 	echo >> launch_ubuntu.sh "export PROOT_LOADER=$HOME/proot-static/bin/loader"
 	echo >> launch_ubuntu.sh ""
-	echo >> launch_ubuntu.sh "proot-distro login --bind $HOME/storage/external-1 --bind /sdcard --isolated ubuntu -- su - user"
-	chmod +x launch_ubuntu.sh
+	#echo >> launch_ubuntu.sh "proot-distro login --bind $HOME/storage/external-1 --bind /sdcard --isolated ubuntu-arm -- su - user"
+	echo >> launch_ubuntu.sh "proot-distro login --bind $HOME/storage/external-1 --bind /sdcard --isolated ubuntu-arm" #Kludge since user act is broken
+ 	chmod +x launch_ubuntu.sh
 	
 	# Inject a 'second stage' installer script into Ubuntu
 	# - This script will not be run right now.  It will be auto-run upon first login (since it is located within '/etc/profile.d/').
@@ -72,7 +80,7 @@ function run_Main()
 	echo -e "\nUbunutu PRoot guest system installed. Launching PRoot to continue the installation. . ."
 	export PATH=$HOME/proot-static/bin:$PATH
 	export PROOT_LOADER=$HOME/proot-static/bin/loader
-	proot-distro login --isolated ubuntu # Log into the Ubuntu PRoot as 'root'.
+	proot-distro login --isolated ubuntu-arm # Log into the Ubuntu-arm PRoot as 'root'.
 	# Since we are planning to run this script from Termux using curl, when all scripts are finished, we will return to Termux.
 }
 
@@ -80,8 +88,8 @@ function run_Main()
 
 function run_InjectSecondStageInstaller()
 {
-	# Inject the 'second stage' installer script into the Ubuntu guest system to be run laterb (none of this gets run right now)
-	cat > $PREFIX/var/lib/proot-distro/installed-rootfs/ubuntu/etc/profile.d/AnBox86b.sh <<- 'EOM'
+	# Inject the 'second stage' installer script into the Ubuntu-arm guest system to be run laterb (none of this gets run right now)
+	cat > $PREFIX/var/lib/proot-distro/installed-rootfs/ubuntu-arm/etc/profile.d/AnBox86b.sh <<- 'EOM'
 		#!/bin/bash
 		# Second stage installer script
 		#  - Because this script is located within '/etc/profile.d/', bash will auto-run it upon any login into PRoot ('root' or 'user').
@@ -98,22 +106,27 @@ function run_InjectSecondStageInstaller()
 		adduser --disabled-password --gecos "" user #BROKEN # Make a user account named 'user' without prompting us for information
 		apt install sudo -y
 		echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers # Give the 'user' account sudo access
-		sudo su - user <<- 'EOT'
+		#sudo su - user <<- 'EOT' #kludge - user accounts are broken at the moment
 			# Install a Python3(?) dependency (a box86 compiling dependency) without prompts (prompts will freeze our 'eot' commands)
 			export DEBIAN_FRONTEND=noninteractive
 			ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
-			sudo apt-get install -y tzdata
+			#sudo apt install tzdata -y #kludge
+			apt-get install tzdata -y
 			sudo dpkg-reconfigure --frontend noninteractive tzdata
 			
 			# Build and install Box86
-			sudo apt install git cmake python3 build-essential gcc -y # box86 dependencies
+			#sudo apt install git cmake python3 build-essential gcc -y # box86 dependencies - kludge
+			apt-get install git cmake python3 build-essential gcc -y
 			git clone https://github.com/ptitSeb/box86
 			sh -c "cd box86 && cmake .. -DARM_DYNAREC=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo ~/box86 && make && make install"
 			rm -rf box86 # remove box86 build directory
 			
 			# Install i386-Wine
-			sudo apt install wget -y
-			sudo apt install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 -y # for wine on proot
+			#sudo apt install wget -y # kludge
+			apt-get install wget -y
+			#sudo apt install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 -y # for wine on proot - kludge
+			apt-get install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 -y
+			apt-get install libncurses6 libtinfo5 libmpg123-0 libpulse0 libasound2 -y #libncurses5-dev libncursesw5-dev libncursesada6.2.3 libtinfo-dev
 			wget https://twisteros.com/wine.tgz
 			tar -xvzf wine.tgz
 			rm wine.tgz
@@ -143,15 +156,18 @@ function run_InjectSecondStageInstaller()
 			sudo chmod +x /usr/local/bin/wine /usr/local/bin/wineboot /usr/local/bin/winecfg /usr/local/bin/wineserver
 			
 			# Install winetricks
-			sudo apt-get install cabextract -y # winetricks needs this
+			#sudo apt install cabextract -y # winetricks needs this
+			apt-get install cabextract -y
 			wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks # download
-			sudo chmod +x winetricks
-			sudo mv winetricks /usr/local/bin
+			#sudo chmod +x winetricks
+			chmod +x winetricks
+			#sudo mv winetricks /usr/local/bin
+			mv winetricks /usr/local/bin
 			
 			echo -e "\nAnBox86 installation complete."
 			echo " - Start Wine Desktop with Start_AnBox86.sh."
 			echo " - You can also run wine and winetricks from commandline inside PRoot. Log in with launch_ubuntu.sh"
-		EOT
+		#EOT
 		# The above commands were pushed into the 'user' account while we were in 'root'. So now that these commands are done, we will still be in 'root'.
 	EOM
 	# The above commands will be run in the future upon login to Ubuntu PRoot as 'root' ('user' doesn't exist yet).
