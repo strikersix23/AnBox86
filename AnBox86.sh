@@ -44,7 +44,12 @@ function run_Main()
 	echo >> Start_AnBox86.sh "export PROOT_LOADER=$HOME/proot-static/bin/loader"
 	echo >> Start_AnBox86.sh ""
 	echo >> Start_AnBox86.sh "# Automatically start Box86 and Wine Desktop from within the Termux user account"
-	echo >> Start_AnBox86.sh "proot-distro login --bind $HOME/storage/external-1:/external-storage --bind /sdcard:/internal-storage --isolated ubuntu-arm --user user -- <<- 'EOC'" # TODO: Fix me
+	#echo >> Start_AnBox86.sh "proot-distro login --bind $HOME/storage/external-1:/external-storage --bind /sdcard:/internal-storage --isolated ubuntu-arm --user user -- <<- 'EOC'" # TODO: Fix me
+	#echo >> Start_AnBox86.sh "	export DISPLAY=localhost:0"
+	#echo >> Start_AnBox86.sh "	sudo Xephyr :1 -noreset -fullscreen &"
+	#echo >> Start_AnBox86.sh "	DISPLAY=:1 box86 ~/wine/bin/wine explorer /desktop=wine,1280x720 explorer"
+	#echo >> Start_AnBox86.sh "EOC"
+	echo >> Start_AnBox86.sh "proot-distro login --bind $HOME/storage/external-1:/external-storage --bind /sdcard:/internal-storage --isolated ubuntu-arm -- <<- 'EOC'" # TODO: Fix me
 	echo >> Start_AnBox86.sh "	export DISPLAY=localhost:0"
 	echo >> Start_AnBox86.sh "	sudo Xephyr :1 -noreset -fullscreen &"
 	echo >> Start_AnBox86.sh "	DISPLAY=:1 box86 ~/wine/bin/wine explorer /desktop=wine,1280x720 explorer"
