@@ -63,8 +63,9 @@ function run_Main()
 	echo >> launch_ubuntu.sh "export PATH=$HOME/proot-static/bin:$PATH"
 	echo >> launch_ubuntu.sh "export PROOT_LOADER=$HOME/proot-static/bin/loader"
 	echo >> launch_ubuntu.sh ""
-	echo >> launch_ubuntu.sh "proot-distro login --bind $HOME/storage/external-1 --bind /sdcard --isolated ubuntu-arm -- su - user"
-	chmod +x launch_ubuntu.sh
+	#echo >> launch_ubuntu.sh "proot-distro login --bind $HOME/storage/external-1 --bind /sdcard --isolated ubuntu-arm -- su - user"
+	echo >> launch_ubuntu.sh "proot-distro login --bind $HOME/storage/external-1 --bind /sdcard --isolated ubuntu-arm" #Kludge since user act is broken
+ 	chmod +x launch_ubuntu.sh
 	
 	# Inject a 'second stage' installer script into Ubuntu
 	# - This script will not be run right now.  It will be auto-run upon first login (since it is located within '/etc/profile.d/').
@@ -104,22 +105,23 @@ function run_InjectSecondStageInstaller()
 			# Install a Python3(?) dependency (a box86 compiling dependency) without prompts (prompts will freeze our 'eot' commands)
 			export DEBIAN_FRONTEND=noninteractive
 			ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
-			#sudo apt install tzdata -y
+			#sudo apt install tzdata -y #kludge
 			apt-get install tzdata -y
 			sudo dpkg-reconfigure --frontend noninteractive tzdata
 			
 			# Build and install Box86
-			#sudo apt install git cmake python3 build-essential gcc -y # box86 dependencies
+			#sudo apt install git cmake python3 build-essential gcc -y # box86 dependencies - kludge
 			apt-get install git cmake python3 build-essential gcc -y
 			git clone https://github.com/ptitSeb/box86
 			sh -c "cd box86 && cmake .. -DARM_DYNAREC=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo ~/box86 && make && make install"
 			rm -rf box86 # remove box86 build directory
 			
 			# Install i386-Wine
-			#sudo apt install wget -y
+			#sudo apt install wget -y # kludge
 			apt-get install wget -y
-			#sudo apt install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 -y # for wine on proot
+			#sudo apt install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 -y # for wine on proot - kludge
 			apt-get install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 -y
+			apt-get install libncurses6 libtinfo5 libmpg123-0 libpulse0 libasound2 -y #libncurses5-dev libncursesw5-dev libncursesada6.2.3 libtinfo-dev
 			wget https://twisteros.com/wine.tgz
 			tar -xvzf wine.tgz
 			rm wine.tgz
