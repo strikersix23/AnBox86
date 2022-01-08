@@ -152,9 +152,7 @@ function run_InjectSecondStageInstaller()
 			sudo apt install cabextract -y # winetricks needs this
 			wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks # download
 			sudo chmod +x winetricks
-			chmod +x winetricks
 			sudo mv winetricks /usr/local/bin
-			mv winetricks /usr/local/bin
 			
 			echo -e "\nAnBox86 installation complete."
 			echo " - Start Wine Desktop with Start_AnBox86.sh."
