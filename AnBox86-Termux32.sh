@@ -12,6 +12,9 @@ function run_Main()
 {
 	rm -f AnBox86.sh # sliently self-destruct (since this script should only be run once) just in case the user ran this script by downloading it
 	
+	###curl https://raw.githubusercontent.com/WMCB-Tech/termux-prefix-switcher/master/termux-prefix-switcher
+	###termux-prefix-switcher switch
+	
         # Enable left & right keys in Termux (optional) - https://www.learntermux.tech/2020/01/how-to-enable-extra-keys-in-termux.html
 	mkdir $HOME/.termux/
 	echo "extra-keys = [['ESC','/','-','HOME','UP','END'],['TAB','CTRL','ALT','LEFT','DOWN','RIGHT']]" >> $HOME/.termux/termux.properties
@@ -31,7 +34,7 @@ function run_Main()
 	cp $PREFIX/etc/proot-distro/ubuntu.sh $PREFIX/etc/proot-distro/ubuntu-arm.sh # make a new distro installer script for proot-distro
 	sed -i '/^DISTRO_NAME.*/a DISTRO_ARCH="arm"' $PREFIX/etc/proot-distro/ubuntu-arm.sh # add a new DISTRO_ARCH="arm" flag after DISTRO_NAME.
 	proot-distro install ubuntu-arm
-	git clone https://github.com/ZhymabekRoman/proot-static # Use a 32bit PRoot instead of 64bit
+	###git clone https://github.com/ZhymabekRoman/proot-static # Use a 32bit PRoot instead of 64bit
 	
 	# Create a script to start XServerXSDL and log into PRoot as the 'user' account (which we will create later)
 	echo >> Start_AnBox86.sh "#!/bin/bash"
@@ -40,16 +43,11 @@ function run_Main()
 	echo >> Start_AnBox86.sh "am start --user 0 -n x.org.server/x.org.server.RunFromOtherApp # Launch the XServerXSDL android app"
 	echo >> Start_AnBox86.sh "sleep 7s"
 	echo >> Start_AnBox86.sh ""
-	echo >> Start_AnBox86.sh "export PATH=$HOME/proot-static/bin:$PATH"
-	echo >> Start_AnBox86.sh "export PROOT_LOADER=$HOME/proot-static/bin/loader"
+	###echo >> Start_AnBox86.sh "export PATH=$HOME/proot-static/bin:$PATH"
+	###echo >> Start_AnBox86.sh "export PROOT_LOADER=$HOME/proot-static/bin/loader"
 	echo >> Start_AnBox86.sh ""
 	echo >> Start_AnBox86.sh "# Automatically start Box86 and Wine Desktop from within the Termux user account"
-	#echo >> Start_AnBox86.sh "proot-distro login --bind $HOME/storage/external-1:/external-storage --bind /sdcard:/internal-storage --isolated ubuntu-arm --user user -- <<- 'EOC'" # TODO: Fix me
-	#echo >> Start_AnBox86.sh "	export DISPLAY=localhost:0"
-	#echo >> Start_AnBox86.sh "	sudo Xephyr :1 -noreset -fullscreen &"
-	#echo >> Start_AnBox86.sh "	DISPLAY=:1 box86 ~/wine/bin/wine explorer /desktop=wine,1280x720 explorer"
-	#echo >> Start_AnBox86.sh "EOC"
-	echo >> Start_AnBox86.sh "proot-distro login --bind $HOME/storage/external-1:/external-storage --bind /sdcard:/internal-storage --isolated ubuntu-arm -- <<- 'EOC'" # TODO: Fix me
+	echo >> Start_AnBox86.sh "proot-distro login --bind $HOME/storage/external-1:/external-storage --bind /sdcard:/internal-storage --isolated ubuntu-arm --user user -- <<- 'EOC'" # TODO: Fix me
 	echo >> Start_AnBox86.sh "	export DISPLAY=localhost:0"
 	echo >> Start_AnBox86.sh "	sudo Xephyr :1 -noreset -fullscreen &"
 	echo >> Start_AnBox86.sh "	DISPLAY=:1 box86 ~/wine/bin/wine explorer /desktop=wine,1280x720 explorer"
@@ -65,12 +63,11 @@ function run_Main()
 	# Create a script to log into PRoot as the 'user' account (which we will create later)
 	echo >> launch_ubuntu.sh "#!/bin/bash"
 	echo >> launch_ubuntu.sh ""
-	echo >> launch_ubuntu.sh "export PATH=$HOME/proot-static/bin:$PATH"
-	echo >> launch_ubuntu.sh "export PROOT_LOADER=$HOME/proot-static/bin/loader"
+	###echo >> launch_ubuntu.sh "export PATH=$HOME/proot-static/bin:$PATH"
+	###echo >> launch_ubuntu.sh "export PROOT_LOADER=$HOME/proot-static/bin/loader"
 	echo >> launch_ubuntu.sh ""
-	#echo >> launch_ubuntu.sh "proot-distro login --bind $HOME/storage/external-1 --bind /sdcard --isolated ubuntu-arm -- su - user"
-	echo >> launch_ubuntu.sh "proot-distro login --bind $HOME/storage/external-1 --bind /sdcard --isolated ubuntu-arm" #Kludge since user act is broken
- 	chmod +x launch_ubuntu.sh
+	echo >> launch_ubuntu.sh "proot-distro login --bind $HOME/storage/external-1 --bind /sdcard --isolated ubuntu-arm -- su - user"
+	chmod +x launch_ubuntu.sh
 	
 	# Inject a 'second stage' installer script into Ubuntu
 	# - This script will not be run right now.  It will be auto-run upon first login (since it is located within '/etc/profile.d/').
@@ -78,8 +75,8 @@ function run_Main()
 	
 	# Log into PRoot (which will then launch the 'second stage' installer)
 	echo -e "\nUbunutu PRoot guest system installed. Launching PRoot to continue the installation. . ."
-	export PATH=$HOME/proot-static/bin:$PATH
-	export PROOT_LOADER=$HOME/proot-static/bin/loader
+	###export PATH=$HOME/proot-static/bin:$PATH
+	###export PROOT_LOADER=$HOME/proot-static/bin/loader
 	proot-distro login --isolated ubuntu-arm # Log into the Ubuntu-arm PRoot as 'root'.
 	# Since we are planning to run this script from Termux using curl, when all scripts are finished, we will return to Termux.
 }
@@ -103,30 +100,26 @@ function run_InjectSecondStageInstaller()
 		
 		# Create a user account within PRoot & install Wine into it (best practices are to not run Wine as root).
 		#  - We are currently in PRoot's 'root'.  To run commands within a 'user' account, we must push them into 'user' using heredoc.
-		adduser --disabled-password --gecos "" user #BROKEN # Make a user account named 'user' without prompting us for information
+		adduser --disabled-password --gecos "" user
 		apt install sudo -y
 		echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers # Give the 'user' account sudo access
-		#sudo su - user <<- 'EOT' #kludge - user accounts are broken at the moment
+		sudo su - user <<- 'EOT'
 			# Install a Python3(?) dependency (a box86 compiling dependency) without prompts (prompts will freeze our 'eot' commands)
 			export DEBIAN_FRONTEND=noninteractive
 			ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
-			#sudo apt install tzdata -y #kludge
-			apt-get install tzdata -y
+			sudo apt install tzdata -y
 			sudo dpkg-reconfigure --frontend noninteractive tzdata
 			
 			# Build and install Box86
-			#sudo apt install git cmake python3 build-essential gcc -y # box86 dependencies - kludge
-			apt-get install git cmake python3 build-essential gcc -y
+			sudo apt install git cmake python3 build-essential gcc -y # box86 dependencies
 			git clone https://github.com/ptitSeb/box86
 			sh -c "cd box86 && cmake .. -DARM_DYNAREC=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo ~/box86 && make && make install"
 			rm -rf box86 # remove box86 build directory
 			
 			# Install i386-Wine
-			#sudo apt install wget -y # kludge
-			apt-get install wget -y
-			#sudo apt install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 -y # for wine on proot - kludge
-			apt-get install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 -y
-			apt-get install libncurses6 libtinfo5 libmpg123-0 libpulse0 libasound2 -y #libncurses5-dev libncursesw5-dev libncursesada6.2.3 libtinfo-dev
+			sudo apt install wget -y
+			sudo apt install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 -y # for wine on proot
+			sudo apt-get install libncurses6 libtinfo5 libmpg123-0 libpulse0 libasound2 -y #libncurses5-dev libncursesw5-dev libncursesada6.2.3 libtinfo-dev
 			wget https://twisteros.com/wine.tgz
 			tar -xvzf wine.tgz
 			rm wine.tgz
@@ -156,18 +149,17 @@ function run_InjectSecondStageInstaller()
 			sudo chmod +x /usr/local/bin/wine /usr/local/bin/wineboot /usr/local/bin/winecfg /usr/local/bin/wineserver
 			
 			# Install winetricks
-			#sudo apt install cabextract -y # winetricks needs this
-			apt-get install cabextract -y
+			sudo apt install cabextract -y # winetricks needs this
 			wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks # download
-			#sudo chmod +x winetricks
+			sudo chmod +x winetricks
 			chmod +x winetricks
-			#sudo mv winetricks /usr/local/bin
+			sudo mv winetricks /usr/local/bin
 			mv winetricks /usr/local/bin
 			
 			echo -e "\nAnBox86 installation complete."
 			echo " - Start Wine Desktop with Start_AnBox86.sh."
 			echo " - You can also run wine and winetricks from commandline inside PRoot. Log in with launch_ubuntu.sh"
-		#EOT
+		EOT
 		# The above commands were pushed into the 'user' account while we were in 'root'. So now that these commands are done, we will still be in 'root'.
 	EOM
 	# The above commands will be run in the future upon login to Ubuntu PRoot as 'root' ('user' doesn't exist yet).
