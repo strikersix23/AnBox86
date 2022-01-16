@@ -83,6 +83,9 @@ function run_InjectSecondStageInstaller()
 			git clone https://github.com/ptitSeb/box86
 			sh -c "cd box86 && mkdir build; cd build; cmake .. -DARM_DYNAREC=ON -DRPI4ARM64=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo; make && make install"
 			sudo rm -rf box86
+			
+			# Install amd64-Wine (also installs x86 wine binary)
+			sudo apt install wget -y
 			sudo apt install libc6:armhf libx11-6:armhf libgdk-pixbuf2.0-0:armhf libgtk2.0-0:armhf libstdc++6:armhf libsdl2-2.0-0:armhf \
 				mesa-va-drivers:armhf libsdl1.2-dev:armhf libsdl-mixer1.2:armhf libpng16-16:armhf libcal3d12v5:armhf \
 				libsdl2-net-2.0-0:armhf libopenal1:armhf libsdl2-image-2.0-0:armhf libvorbis-dev:armhf libcurl4:armhf osspd:armhf \
@@ -90,16 +93,36 @@ function run_InjectSecondStageInstaller()
 				libsmpeg0:armhf libboost-filesystem1.67.0:armhf libboost-program-options1.67.0:armhf libavcodec58:armhf \
 				libavformat58:armhf libswscale5:armhf libmyguiengine3debian1v5:armhf libboost-iostreams1.67.0:armhf \
 				libsdl2-mixer-2.0-0:armhf -y # libc6:armhf required. Unsure about the rest but works. Credits: monkaBlyat (Dr. van RockPi) & Itai-Nelken.
-			
-			# Install amd64-Wine (also installs x86 wine binary)
-			sudo apt install wget -y
 			sudo apt install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 -y # for wine on proot?
-			wget https://www.playonlinux.com/wine/binaries/phoenicis/upstream-linux-amd64/PlayOnLinux-wine-6.0-upstream-linux-amd64.tar.gz
-			mkdir wine && tar -xvf PlayOnLinux-wine-6.0-upstream-linux-amd64.tar.gz -C wine
-			rm PlayOnLinux-wine-6.0-upstream-linux-amd64.tar.gz
-			#wget https://twisteros.com/wine.tgz
-			#tar -xvzf wine.tgz
-			#rm wine.tgz
+			
+			mkdir downloads; cd downloads
+				# Wine download links from WineHQ: https://dl.winehq.org/wine-builds/
+				LNK1="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-amd64/"
+				DEB1="wine-stable-amd64_6.0.2~bullseye-1_amd64.deb"
+				DEB2="wine-stable_6.0.2~bullseye-1_amd64.deb"
+				DEB3="winehq-stable_6.0.2~bullseye-1_amd64.deb"
+				LNK2="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-i386/"
+				DEB4="wine-stable-i386_6.0.2~bullseye-1_i386.deb"
+				DEB5="wine-stable_6.0.2~bullseye-1_i386.deb"
+				DEB6="winehq-stable_6.0.2~bullseye-1_i386.deb"
+				# Download, extract wine, and install wine
+				echo "Downloading wine . . ."
+				wget ${LNK1}${DEB1} || echo "${DEB1} download failed!"
+				wget ${LNK1}${DEB2} || echo "${DEB2} download failed!"
+				wget ${LNK1}${DEB3} || echo "${DEB3} download failed!"
+				wget ${LNK2}${DEB4} || echo "${DEB4} download failed!"
+				wget ${LNK2}${DEB5} || echo "${DEB5} download failed!"
+				wget ${LNK2}${DEB6} || echo "${DEB6} download failed!"
+				echo "Extracting wine . . ."
+				dpkg-deb -x ${DEB1} wine-installer
+				dpkg-deb -x ${DEB2} wine-installer
+				dpkg-deb -x ${DEB3} wine-installer
+				dpkg-deb -x ${DEB4} wine-installer
+				dpkg-deb -x ${DEB5} wine-installer
+				dpkg-deb -x ${DEB6} wine-installer
+				echo "Installing wine . . ."
+				mv wine-installer/opt/wine* ~/wine
+			cd ..; rm -rf downloads/
 			
 			# Give PRoot an X server ('screen 1') to send video to (and don't stop the X server after last client logs off)
 			sudo apt install xserver-xephyr -y
