@@ -80,7 +80,7 @@ function run_Main()
 	echo -e "\nUbunutu PRoot guest system installed. Launching PRoot to continue the installation. . ."
 	export PATH=$HOME/proot-static/bin:$PATH
 	export PROOT_LOADER=$HOME/proot-static/bin/loader
-	proot-distro login --isolated ubuntu-arm # Log into the Ubuntu-arm PRoot as 'root'.
+	proot-distro login --isolated ubuntu-arm # Log into the Ubuntu-arm PRoot as 'root'. ##TODO! check to see if --shared-tmp helps wine access
 	# Since we are planning to run this script from Termux using curl, when all scripts are finished, we will return to Termux.
 }
 
