@@ -118,14 +118,14 @@ function run_InjectSecondStageInstaller()
 				wget ${LNK1}${DEB1} || echo "${DEB1} download failed!"
 				wget ${LNK1}${DEB2} || echo "${DEB2} download failed!"
 				#wget ${LNK1}${DEB3} || echo "${DEB3} download failed!"
-				#wget ${LNK2}${DEB4} || echo "${DEB4} download failed!"
+				wget ${LNK2}${DEB4} || echo "${DEB4} download failed!"
 				#wget ${LNK2}${DEB5} || echo "${DEB5} download failed!"
 				#wget ${LNK2}${DEB6} || echo "${DEB6} download failed!"
 				echo "Extracting wine . . ."
 				dpkg-deb -x ${DEB1} wine-installer
 				dpkg-deb -x ${DEB2} wine-installer
 				#dpkg-deb -x ${DEB3} wine-installer
-				#dpkg-deb -x ${DEB4} wine-installer
+				dpkg-deb -x ${DEB4} wine-installer
 				#dpkg-deb -x ${DEB5} wine-installer
 				#dpkg-deb -x ${DEB6} wine-installer
 				echo "Installing wine . . ."
