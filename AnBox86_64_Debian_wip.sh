@@ -105,29 +105,29 @@ function run_InjectSecondStageInstaller()
 				DEB4="wine-stable-i386_5.0.0~bullseye_i386.deb"
 				DEB5="wine-stable_5.0.0~bullseye_i386.deb"
 				DEB6="winehq-stable_5.0.0~bullseye_i386.deb"
-				#LNK1="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-amd64/"
-				#DEB1="wine-stable-amd64_6.0.2~bullseye-1_amd64.deb"
-				#DEB2="wine-stable_6.0.2~bullseye-1_amd64.deb"
-				#DEB3="winehq-stable_6.0.2~bullseye-1_amd64.deb"
-				#LNK2="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-i386/"
-				#DEB4="wine-stable-i386_6.0.2~bullseye-1_i386.deb"
-				#DEB5="wine-stable_6.0.2~bullseye-1_i386.deb"
-				#DEB6="winehq-stable_6.0.2~bullseye-1_i386.deb"
+					#LNK1="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-amd64/"
+					#DEB1="wine-stable-amd64_6.0.2~bullseye-1_amd64.deb"
+					#DEB2="wine-stable_6.0.2~bullseye-1_amd64.deb"
+					#DEB3="winehq-stable_6.0.2~bullseye-1_amd64.deb"
+					#LNK2="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-i386/"
+					#DEB4="wine-stable-i386_6.0.2~bullseye-1_i386.deb"
+					#DEB5="wine-stable_6.0.2~bullseye-1_i386.deb"
+					#DEB6="winehq-stable_6.0.2~bullseye-1_i386.deb"
 				# Download, extract wine, and install wine
 				echo "Downloading wine . . ."
 				wget ${LNK1}${DEB1} || echo "${DEB1} download failed!"
 				wget ${LNK1}${DEB2} || echo "${DEB2} download failed!"
-				wget ${LNK1}${DEB3} || echo "${DEB3} download failed!"
-				wget ${LNK2}${DEB4} || echo "${DEB4} download failed!"
-				wget ${LNK2}${DEB5} || echo "${DEB5} download failed!"
-				wget ${LNK2}${DEB6} || echo "${DEB6} download failed!"
+				#wget ${LNK1}${DEB3} || echo "${DEB3} download failed!"
+				#wget ${LNK2}${DEB4} || echo "${DEB4} download failed!"
+				#wget ${LNK2}${DEB5} || echo "${DEB5} download failed!"
+				#wget ${LNK2}${DEB6} || echo "${DEB6} download failed!"
 				echo "Extracting wine . . ."
 				dpkg-deb -x ${DEB1} wine-installer
 				dpkg-deb -x ${DEB2} wine-installer
-				dpkg-deb -x ${DEB3} wine-installer
-				dpkg-deb -x ${DEB4} wine-installer
-				dpkg-deb -x ${DEB5} wine-installer
-				dpkg-deb -x ${DEB6} wine-installer
+				#dpkg-deb -x ${DEB3} wine-installer
+				#dpkg-deb -x ${DEB4} wine-installer
+				#dpkg-deb -x ${DEB5} wine-installer
+				#dpkg-deb -x ${DEB6} wine-installer
 				echo "Installing wine . . ."
 				mv wine-installer/opt/wine* ~/wine
 			cd ..; rm -rf downloads/
