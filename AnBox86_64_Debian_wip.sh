@@ -139,12 +139,15 @@ function run_InjectSecondStageInstaller()
 			echo >> ~/.bashrc "sudo Xephyr :1 -noreset -fullscreen &"
 			
 			# Make scripts and symlinks to transparently run wine with box86 (since we don't have binfmt_misc available)
-			echo -e '#!/bin/bash'"\nDISPLAY=:1 box64 $HOME/wine/bin/wine64" '"$@"' | sudo tee -a /usr/local/bin/wine64 >/dev/null
-			echo -e '#!/bin/bash'"\nDISPLAY=:1 box86 $HOME/wine/bin/wine" '"$@"' | sudo tee -a /usr/local/bin/wine >/dev/null
-			echo -e '#!/bin/bash'"\nbox64 $HOME/wine/bin/wineserver" '"$@"' | sudo tee -a /usr/local/bin/wineserver >/dev/null
+			#echo -e '#!/bin/bash'"\nDISPLAY=:1 box64 $HOME/wine/bin/wine64" '"$@"' | sudo tee -a /usr/local/bin/wine64 >/dev/null
+			#echo -e '#!/bin/bash'"\nDISPLAY=:1 box86 $HOME/wine/bin/wine" '"$@"' | sudo tee -a /usr/local/bin/wine >/dev/null
+			#echo -e '#!/bin/bash'"\nbox64 $HOME/wine/bin/wineserver" '"$@"' | sudo tee -a /usr/local/bin/wineserver >/dev/null
+			sudo ln -s $HOME/wine/bin/wine64 /usr/local/bin/wine64
+			sudo ln -s $HOME/wine/bin/wine /usr/local/bin/wine
+			sudo ln -s $HOME/wine/bin/wineserver /usr/local/bin/wineserver
 			sudo ln -s $HOME/wine/bin/wineboot /usr/local/bin/wineboot
 			sudo ln -s $HOME/wine/bin/winecfg /usr/local/bin/winecfg
-			sudo chmod +x /usr/local/bin/wine64 /usr/local/bin/wine /usr/local/bin/wineboot /usr/local/bin/winecfg /usr/local/bin/wineserver
+			#sudo chmod +x /usr/local/bin/wine64 /usr/local/bin/wine /usr/local/bin/wineboot /usr/local/bin/winecfg /usr/local/bin/wineserver
 			
 			# Install winetricks
 			sudo apt-get install wget cabextract -y # winetricks needs this
@@ -153,8 +156,16 @@ function run_InjectSecondStageInstaller()
 			sudo mv winetricks /usr/local/bin
 			
 			#Testing: Kludge to get box86 to be detected by proot - most of these packages were already installed
-			sudo dpkg --add-architecture armhf && sudo apt update
-			sudo apt install libc6:armhf libncurses5:armhf libstdc++6:armhf -y #magic command that makes box86 run on aarch64 https://github.com/ptitSeb/box86/issues/465
+			#sudo dpkg --add-architecture armhf && sudo apt update
+			#sudo apt install libc6:armhf libncurses5:armhf libstdc++6:armhf -y #magic command that makes box86 run on aarch64 https://github.com/ptitSeb/box86/issues/465
+			
+			#Download notepad++ 32bit and 64bit to test
+			sudo apt install p7zip-full nano -y
+			wget wget https://notepad-plus-plus.org/repository/7.x/7.0/npp.7.bin.zip #32bit
+			wget wget https://notepad-plus-plus.org/repository/7.x/7.0/npp.7.bin.x64.zip #64bit
+			7z x npp.7.bin.zip -o"npp32"
+			7z x npp.7.bin.x64.zip -o"npp64"
+			DISPLAY=:1 /usr/local/bin/box64 /home/user/wine/bin/wine64 /home/user/npp64/notepad++.exe
 			
 			#TO-DO: Make this display whenever logging into proot 
 			echo -e "\nAnBox86 installation complete."
