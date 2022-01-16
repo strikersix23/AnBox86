@@ -21,9 +21,9 @@ Wine https://www.winehq.org
 
 Termux https://github.com/termux/termux-app
 
-Proot-Static by Zhymabek Roman https://github.com/ZhymabekRoman/proot-static
+PRoot-Static by Zhymabek Roman https://github.com/ZhymabekRoman/proot-static
 
-proot-distro by xeffyr https://github.com/termux/proot-distro
+PRoot-Distro by xeffyr https://github.com/termux/proot-distro
 
 
 # Huge thanks to
