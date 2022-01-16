@@ -15,13 +15,15 @@ curl https://raw.githubusercontent.com/WheezyE/AnBox86/main/AnBox86.sh | bash
 
 # Projects used
 
-Proot-Static by Zhymabek Roman https://github.com/ZhymabekRoman/proot-static
-
 Box86 by ptitseb https://github.com/ptitSeb/box86
 
 Wine https://www.winehq.org
 
 Termux https://github.com/termux/termux-app
+
+Proot-Static by Zhymabek Roman https://github.com/ZhymabekRoman/proot-static
+
+proot-distro by xeffyr https://github.com/termux/proot-distro
 
 
 # Huge thanks to
