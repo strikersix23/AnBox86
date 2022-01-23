@@ -96,10 +96,6 @@ function run_InjectSecondStageInstaller()
 				libavformat58:armhf libswscale5:armhf libmyguiengine3debian1v5:armhf libboost-iostreams1.67.0:armhf \
 				libsdl2-mixer-2.0-0:armhf -y # libc6:armhf required. Unsure about the rest but works for i386-wine on aarch64. Credits: monkaBlyat (Dr. van RockPi) & Itai-Nelken.
 			sudo apt install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 -y # for wine on proot?
-			sudo apt install libc6:armhf libncurses5:armhf libstdc++6:armhf libfontconfig1:armhf libmpg123-0:armhf libcups2:armhf \ #libc6:armhf is needed for box86 to be detected by aarch64 https://github.com/ptitSeb/box86/issues/465
-				libncurses6:armhf libfreetype6:armhf libxcb1:armhf libxext6:armhf libxinerama1:armhf libxxf86vm1:armhf \
-				libxrender1:armhf libxcomposite1:armhf libxi6:armhf libxcursor1:armhf libxrandr2:armhf -y #TODO: Go through this dependencies list and weed out un-needed libraries.
-			sudo apt install libcups2 -y #for box64
 			
 			mkdir downloads; cd downloads
 				# Wine download links from WineHQ: https://dl.winehq.org/wine-builds/
@@ -160,6 +156,13 @@ function run_InjectSecondStageInstaller()
 			wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks # download
 			sudo chmod +x winetricks
 			sudo mv winetricks /usr/local/bin
+			
+			# Have to install these later for some reason, but not sure why - does xserver install wipe these out?
+			sudo apt install libc6:armhf libncurses5:armhf libstdc++6:armhf libfontconfig1:armhf libmpg123-0:armhf libcups2:armhf \ #libc6:armhf is needed for box86 to be detected by aarch64 https://github.com/ptitSeb/box86/issues/465
+				libncurses6:armhf libfreetype6:armhf libxcb1:armhf libxext6:armhf libxinerama1:armhf libxxf86vm1:armhf \
+				libxrender1:armhf libxcomposite1:armhf libxi6:armhf libxcursor1:armhf libxrandr2:armhf -y #TODO: Go through this dependencies list and weed out un-needed libraries.
+			sudo apt install libcups2 -y #for box64
+			
 			
 			#Download notepad++ 32bit and 64bit to test
 			sudo apt install p7zip-full nano -y
