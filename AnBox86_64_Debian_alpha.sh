@@ -87,7 +87,7 @@ function run_InjectSecondStageInstaller()
 
 			# Download and install box64 & box86 (RPi4ARM64 builds seem to work on AArch64 Termux Debian PRoot)
 			# Files are from GitHub "Actions" build artifacts, linked to via www.nightly.link
-			sudo apt install p7zip-full wget -y
+			sudo apt install p7zip-full wget -y #build-essential gcc gcc-arm-linux-gnueabihf -y
 			wget https://nightly.link/ptitSeb/box64/actions/artifacts/148608519.zip #box64 (RPI4ARM64)
 			wget https://nightly.link/ptitSeb/box86/actions/artifacts/148607181.zip #box86 (RPI4ARM64)
 			7z x 148608519.zip -o"/usr/local/bin/" #extract box64 to /usr/local/bin/box64
