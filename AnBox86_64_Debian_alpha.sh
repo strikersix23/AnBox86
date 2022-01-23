@@ -65,29 +65,37 @@ function run_InjectSecondStageInstaller()
 		adduser --disabled-password --gecos "" user # Make a user account named 'user' without prompting us for information
 		apt install sudo -y && echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers # Give the 'user' account sudo access
 		sudo su - user <<- 'EOT'
-			# Install a Python3(?) dependency (a box86_64 compiling dependency) without prompts (prompts will freeze our 'eot' commands)
-			export DEBIAN_FRONTEND=noninteractive
-			ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
-			sudo apt-get install -y tzdata
-			sudo dpkg-reconfigure --frontend noninteractive tzdata
-			
-			# Build and install Box64
-			sudo apt install git cmake python3 build-essential gcc -y # box64 dependencies
-			git clone https://github.com/ptitSeb/box64
-			sh -c "cd box64 && mkdir build; cd build; cmake .. -DARM_DYNAREC=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo; make && make install"
-			sudo rm -rf box64
-			
-			# Build and install Box86 (for aarch64)
 			sudo dpkg --add-architecture armhf && sudo apt update #enable multi-arch on aarch64 (so we can install armhf libraries for box86/winei386)
-			sudo apt install gcc-arm-linux-gnueabihf git cmake python3 build-essential gcc -y
-			git clone https://github.com/ptitSeb/box86
-			sh -c "cd box86 && mkdir build; cd build; cmake .. -DARM_DYNAREC=ON -DRPI4ARM64=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo; make && make install"
-			sudo rm -rf box86
-			#TODO: Download nightly builds instead of compile on-device
+			
+				## Install a Python3(?) dependency (a box86_64 compiling dependency) without prompts (prompts will freeze our 'eot' commands)
+				#export DEBIAN_FRONTEND=noninteractive
+				#ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
+				#sudo apt-get install -y tzdata
+				#sudo dpkg-reconfigure --frontend noninteractive tzdata
+
+				## Build and install box64
+				#sudo apt install git cmake python3 build-essential gcc -y # box64 dependencies
+				#git clone https://github.com/ptitSeb/box64
+				#sh -c "cd box64 && mkdir build; cd build; cmake .. -DARM_DYNAREC=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo; make && make install"
+				#sudo rm -rf box64
+
+				## Build and install box86 (for aarch64)
+				#sudo apt install gcc-arm-linux-gnueabihf git cmake python3 build-essential gcc -y
+				#git clone https://github.com/ptitSeb/box86
+				#sh -c "cd box86 && mkdir build; cd build; cmake .. -DARM_DYNAREC=ON -DRPI4ARM64=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo; make && make install"
+				#sudo rm -rf box86
+
+			# Download and install box64 & box86 (RPi4ARM64 builds seem to work on AArch64 Termux Debian PRoot)
+			# Files are from GitHub "Actions" build artifacts, linked to via www.nightly.link
+			sudo apt install p7zip-full wget -y
+			wget https://nightly.link/ptitSeb/box64/actions/artifacts/148608519.zip #box64 (RPI4ARM64)
+			wget https://nightly.link/ptitSeb/box86/actions/artifacts/148607181.zip #box86 (RPI4ARM64)
+			7z x 148608519.zip -o"/usr/local/bin/" #extract box64 to /usr/local/bin/box64
+			7z x 148607181.zip -o"/usr/local/bin/" #extract box86 to /usr/local/bin/box86
+			sudo chmod +x /usr/local/bin/box64 /usr/local/bin/box86 #make the files executable
+			# TODO: Does box86 make install put any other libs on-system?
 			
 			# Install amd64-wine (64-bit) and i386-wine (32-bit)
-			sudo apt install wget -y
-			
 			sudo apt install libc6:armhf libx11-6:armhf libgdk-pixbuf2.0-0:armhf libgtk2.0-0:armhf libstdc++6:armhf libsdl2-2.0-0:armhf \
 				mesa-va-drivers:armhf libsdl1.2-dev:armhf libsdl-mixer1.2:armhf libpng16-16:armhf libcal3d12v5:armhf \
 				libsdl2-net-2.0-0:armhf libopenal1:armhf libsdl2-image-2.0-0:armhf libvorbis-dev:armhf libcurl4:armhf osspd:armhf \
@@ -165,17 +173,17 @@ function run_InjectSecondStageInstaller()
 			sudo chmod +x winetricks
 			sudo mv winetricks /usr/local/bin
 			
-			#Download notepad++ 32bit and 64bit to test
-			sudo apt install p7zip-full nano -y
-			wget https://notepad-plus-plus.org/repository/7.x/7.0/npp.7.bin.zip #32bit
-			wget https://notepad-plus-plus.org/repository/7.x/7.0/npp.7.bin.x64.zip #64bit
-			7z x npp.7.bin.zip -o"npp32"
-			7z x npp.7.bin.x64.zip -o"npp64"
-			#DISPLAY=:1 /usr/local/bin/box64 /home/user/wine/bin/wine64 /home/user/npp64/notepad++.exe
-			#DISPLAY=:1 WINEPREFIX=~/.wine32/ /usr/local/bin/box86 /home/user/wine/bin/wine /home/user/npp32/notepad++.exe
+				#TESTING: Download notepad++ 32bit and 64bit to test
+				sudo apt install p7zip-full nano -y
+				wget https://notepad-plus-plus.org/repository/7.x/7.0/npp.7.bin.zip #32bit
+				wget https://notepad-plus-plus.org/repository/7.x/7.0/npp.7.bin.x64.zip #64bit
+				7z x npp.7.bin.zip -o"npp32"
+				7z x npp.7.bin.x64.zip -o"npp64"
+				#DISPLAY=:1 /usr/local/bin/box64 /home/user/wine/bin/wine64 /home/user/npp64/notepad++.exe
+				#DISPLAY=:1 WINEPREFIX=~/.wine32/ /usr/local/bin/box86 /home/user/wine/bin/wine /home/user/npp32/notepad++.exe
 
 			
-			#TO-DO: Make this display whenever logging into proot 
+			#TODO: Make this display whenever logging into proot 
 			echo -e "\nAnBox86 installation complete."
 			echo " - From Termux, you can use launch_debian.sh to start Debian PRoot."
 			echo "    (we are currently inside Debian PRoot in a user account)"
@@ -184,6 +192,7 @@ function run_InjectSecondStageInstaller()
 			echo "    (don't forget to use the BOX86_NOBANNER=1 environment variable when launching winetricks)"
 			echo " - After PRoot launches a program, use the Android app 'XServer XSDL' to view & control it."
 			echo "    (if you get display errors, make sure the 'XServer XSDL' app is open and that Android didn't put it to sleep)"
+			#TODO: Find a way to launch xserver xsdl app from proot user acct - launch whenever wine is run
 		EOT
 		# The above commands were pushed into the 'user' account while we were in 'root'. So now that these commands are done, we will still be in 'root'.
 		# Let's tell bash to log into the 'user' account as our final action.
