@@ -87,13 +87,15 @@ function run_InjectSecondStageInstaller()
 
 			# Download and install box64 & box86 (RPi4ARM64 builds seem to work on AArch64 Termux Debian PRoot)
 			# Files are from GitHub "Actions" build artifacts, linked to via www.nightly.link
-			sudo apt install p7zip-full wget -y #build-essential gcc gcc-arm-linux-gnueabihf -y
+			# Also install extra box86 i386 & box64 x86_64 libraries
+			sudo apt install p7zip-full wget git -y
 			wget https://nightly.link/ptitSeb/box64/actions/artifacts/148608519.zip #box64 (RPI4ARM64)
 			wget https://nightly.link/ptitSeb/box86/actions/artifacts/148607181.zip #box86 (RPI4ARM64)
 			7z x 148608519.zip -o"/usr/local/bin/" #extract box64 to /usr/local/bin/box64
 			7z x 148607181.zip -o"/usr/local/bin/" #extract box86 to /usr/local/bin/box86
 			sudo chmod +x /usr/local/bin/box64 /usr/local/bin/box86 #make the files executable
-			# TODO: Does box86 make install put any other libs on-system?
+			git clone https://github.com/ptitSeb/box64.git; mkdir -p /usr/lib/x86_64-linux-gnu/ && cp box64/x64lib/* /usr/lib/x86_64-linux-gnu/
+			git clone https://github.com/ptitSeb/box86.git; mkdir -p /usr/lib/i386-linux-gnu/ && cp box86/x86lib/* /usr/lib/i386-linux-gnu/
 			
 			# Install amd64-wine (64-bit) and i386-wine (32-bit)
 			sudo apt install libc6:armhf libx11-6:armhf libgdk-pixbuf2.0-0:armhf libgtk2.0-0:armhf libstdc++6:armhf libsdl2-2.0-0:armhf \
