@@ -25,13 +25,13 @@ function run_Main()
 	pkg update -y -o Dpkg::Options::=--force-confnew && apt upgrade -y -o Dpkg::Options::=--force-confnew # upgrade Termux and suppress user prompts
 	
 	# Create the Debian PRoot within Termux
-	pkg install proot-distro git -y # F-Droid termux crashes with apt install proot-distro
+	pkg install proot proot-distro git -y # F-Droid termux crashes with apt install proot-distro
 	proot-distro install debian
 	
 	# Create a script to log into PRoot as the 'user' account (which we will create later)
 	echo >> launch_debian.sh "#!/bin/bash"
 	echo >> launch_debian.sh ""
-	echo >> launch_debian.sh "proot-distro login --isolated debian -- su - user" # '--isolated' avoids program conflicts between Termux & PRoot (credits: Mipster)
+	echo >> launch_debian.sh "proot-distro login --isolated --shared-tmp debian -- su - user" # '--isolated' avoids program conflicts between Termux & PRoot (credits: Mipster)
 	chmod +x launch_debian.sh
 	
 	# Inject a 'second stage' installer script into Debian
@@ -39,8 +39,8 @@ function run_Main()
 	run_InjectSecondStageInstaller
 	
 	# Log into PRoot (which will then launch the 'second stage' installer)
-	echo -e "\nUbunutu PRoot guest system installed. Launching PRoot to continue the installation. . ."
-	proot-distro login --isolated debian # Log into the Debian PRoot as 'root'.
+	echo -e "\nDebian PRoot guest system installed. Launching Debian PRoot and continuing installation. . ."
+	proot-distro login --isolated --shared-tmp debian # Log into the Debian PRoot as 'root'.
 }
 
 # ---------------
@@ -78,22 +78,28 @@ function run_InjectSecondStageInstaller()
 			sudo rm -rf box64
 			
 			# Build and install Box86 (for aarch64)
-			sudo dpkg --add-architecture armhf && sudo apt update
+			sudo dpkg --add-architecture armhf && sudo apt update #enable multi-arch on aarch64 (so we can install armhf libraries for box86/winei386)
 			sudo apt install gcc-arm-linux-gnueabihf git cmake python3 build-essential gcc -y
 			git clone https://github.com/ptitSeb/box86
 			sh -c "cd box86 && mkdir build; cd build; cmake .. -DARM_DYNAREC=ON -DRPI4ARM64=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo; make && make install"
 			sudo rm -rf box86
+			#TODO: Download nightly builds instead of compile on-device
 			
-			# Install amd64-Wine (also installs x86 wine binary)
+			# Install amd64-wine (64-bit) and i386-wine (32-bit)
 			sudo apt install wget -y
+			
 			sudo apt install libc6:armhf libx11-6:armhf libgdk-pixbuf2.0-0:armhf libgtk2.0-0:armhf libstdc++6:armhf libsdl2-2.0-0:armhf \
 				mesa-va-drivers:armhf libsdl1.2-dev:armhf libsdl-mixer1.2:armhf libpng16-16:armhf libcal3d12v5:armhf \
 				libsdl2-net-2.0-0:armhf libopenal1:armhf libsdl2-image-2.0-0:armhf libvorbis-dev:armhf libcurl4:armhf osspd:armhf \
 				pulseaudio:armhf libjpeg62:armhf libudev1:armhf libgl1-mesa-dev:armhf libsnappy1v5:armhf libx11-dev:armhf \
 				libsmpeg0:armhf libboost-filesystem1.67.0:armhf libboost-program-options1.67.0:armhf libavcodec58:armhf \
 				libavformat58:armhf libswscale5:armhf libmyguiengine3debian1v5:armhf libboost-iostreams1.67.0:armhf \
-				libsdl2-mixer-2.0-0:armhf -y # libc6:armhf required. Unsure about the rest but works. Credits: monkaBlyat (Dr. van RockPi) & Itai-Nelken.
+				libsdl2-mixer-2.0-0:armhf -y # libc6:armhf required. Unsure about the rest but works for i386-wine on aarch64. Credits: monkaBlyat (Dr. van RockPi) & Itai-Nelken.
 			sudo apt install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 -y # for wine on proot?
+			sudo apt install libc6:armhf libncurses5:armhf libstdc++6:armhf libfontconfig1:armhf libmpg123-0:armhf libcups2:armhf \ #libc6:armhf is needed for box86 to be detected by aarch64 https://github.com/ptitSeb/box86/issues/465
+				libncurses6:armhf libfreetype6:armhf libxcb1:armhf libxext6:armhf libxinerama1:armhf libxxf86vm1:armhf \
+				libxrender1:armhf libxcomposite1:armhf libxi6:armhf libxcursor1:armhf libxrandr2:armhf -y #TODO: Go through this dependencies list and weed out un-needed libraries.
+			sudo apt install libcups2 -y #for box64
 			
 			mkdir downloads; cd downloads
 				# Wine download links from WineHQ: https://dl.winehq.org/wine-builds/
@@ -155,17 +161,15 @@ function run_InjectSecondStageInstaller()
 			sudo chmod +x winetricks
 			sudo mv winetricks /usr/local/bin
 			
-			#Testing: Kludge to get box86 to be detected by proot - most of these packages were already installed
-			#sudo dpkg --add-architecture armhf && sudo apt update
-			#sudo apt install libc6:armhf libncurses5:armhf libstdc++6:armhf -y #magic command that makes box86 run on aarch64 https://github.com/ptitSeb/box86/issues/465
-			
 			#Download notepad++ 32bit and 64bit to test
 			sudo apt install p7zip-full nano -y
-			wget wget https://notepad-plus-plus.org/repository/7.x/7.0/npp.7.bin.zip #32bit
-			wget wget https://notepad-plus-plus.org/repository/7.x/7.0/npp.7.bin.x64.zip #64bit
+			wget https://notepad-plus-plus.org/repository/7.x/7.0/npp.7.bin.zip #32bit
+			wget https://notepad-plus-plus.org/repository/7.x/7.0/npp.7.bin.x64.zip #64bit
 			7z x npp.7.bin.zip -o"npp32"
 			7z x npp.7.bin.x64.zip -o"npp64"
-			DISPLAY=:1 /usr/local/bin/box64 /home/user/wine/bin/wine64 /home/user/npp64/notepad++.exe
+			#DISPLAY=:1 /usr/local/bin/box64 /home/user/wine/bin/wine64 /home/user/npp64/notepad++.exe
+			#DISPLAY=:1 WINEPREFIX=~/.wine32/ /usr/local/bin/box86 /home/user/wine/bin/wine /home/user/npp32/notepad++.exe
+
 			
 			#TO-DO: Make this display whenever logging into proot 
 			echo -e "\nAnBox86 installation complete."
