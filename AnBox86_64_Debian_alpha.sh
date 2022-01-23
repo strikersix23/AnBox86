@@ -96,6 +96,7 @@ function run_InjectSecondStageInstaller()
 			sudo chmod +x /usr/local/bin/box64 /usr/local/bin/box86 #make the files executable
 			git clone https://github.com/ptitSeb/box64.git; mkdir -p /usr/lib/x86_64-linux-gnu/ && cp box64/x64lib/* /usr/lib/x86_64-linux-gnu/
 			git clone https://github.com/ptitSeb/box86.git; mkdir -p /usr/lib/i386-linux-gnu/ && cp box86/x86lib/* /usr/lib/i386-linux-gnu/
+			rm -rf box64/ box86/
 			
 			# Install amd64-wine (64-bit) and i386-wine (32-bit)
 			sudo apt install libc6:armhf libx11-6:armhf libgdk-pixbuf2.0-0:armhf libgtk2.0-0:armhf libstdc++6:armhf libsdl2-2.0-0:armhf \
@@ -106,7 +107,7 @@ function run_InjectSecondStageInstaller()
 				libavformat58:armhf libswscale5:armhf libmyguiengine3debian1v5:armhf libboost-iostreams1.67.0:armhf \
 				libsdl2-mixer-2.0-0:armhf -y
 				# libc6:armhf required. Unsure about the rest but works for i386-wine on aarch64. Credits: monkaBlyat (Dr. van RockPi) & Itai-Nelken.
-			sudo apt install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 -y # for wine on proot?
+			sudo apt install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 libncurses6 -y # for wine on proot?
 			sudo apt install libc6:armhf libncurses5:armhf libstdc++6:armhf libfontconfig1:armhf libmpg123-0:armhf libcups2:armhf \
 				libncurses6:armhf libfreetype6:armhf libxcb1:armhf libxext6:armhf libxinerama1:armhf libxxf86vm1:armhf \
 				libxrender1:armhf libxcomposite1:armhf libxi6:armhf libxcursor1:armhf libxrandr2:armhf -y
