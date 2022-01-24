@@ -67,6 +67,7 @@ function run_InjectSecondStageInstaller()
 		sudo su - user <<- 'EOT'
 			sudo dpkg --add-architecture armhf && sudo apt update #enable multi-arch on aarch64 (so we can install armhf libraries for box86/winei386)
 			
+			# Compile box64 & box86 on-device (takes a long time, builds are fresh and links less breakable)
 				## Install a Python3(?) dependency (a box86_64 compiling dependency) without prompts (prompts will freeze our 'eot' commands)
 				#export DEBIAN_FRONTEND=noninteractive
 				#ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
@@ -85,55 +86,50 @@ function run_InjectSecondStageInstaller()
 				#sh -c "cd box86 && mkdir build; cd build; cmake .. -DARM_DYNAREC=ON -DRPI4ARM64=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo; make && make install"
 				#sudo rm -rf box86
 
-			# Download and install box64 & box86 (RPi4ARM64 builds seem to work on AArch64 Termux Debian PRoot)
-			# Files are from GitHub "Actions" build artifacts, linked to via www.nightly.link
-			# Also install extra box86 i386 & box64 x86_64 libraries
-			sudo apt install p7zip-full wget git -y
-			wget https://nightly.link/ptitSeb/box64/actions/artifacts/148608519.zip #box64 (RPI4ARM64)
-			wget https://nightly.link/ptitSeb/box86/actions/artifacts/148607181.zip #box86 (RPI4ARM64)
-			7z x 148608519.zip -o"/usr/local/bin/" #extract box64 to /usr/local/bin/box64
-			7z x 148607181.zip -o"/usr/local/bin/" #extract box86 to /usr/local/bin/box86
-			sudo chmod +x /usr/local/bin/box64 /usr/local/bin/box86 #make the files executable
-			git clone https://github.com/ptitSeb/box64.git; mkdir -p /usr/lib/x86_64-linux-gnu/ && cp box64/x64lib/* /usr/lib/x86_64-linux-gnu/
-			git clone https://github.com/ptitSeb/box86.git; mkdir -p /usr/lib/i386-linux-gnu/ && cp box86/x86lib/* /usr/lib/i386-linux-gnu/
-			rm -rf box64/ box86/
+			# Download and install box64 & box86 (fast, but builds can be old and links could break)
+				# RPi4ARM64 builds for box64 & box86 seem to work on AArch64 Termux Debian PRoot
+				# Box86/box64 binaries are from GitHub "Actions" build artifacts, linked to via www.nightly.link
+				sudo apt install p7zip-full wget git -y
+				wget https://nightly.link/ptitSeb/box64/actions/artifacts/148608519.zip #box64 (RPI4ARM64)
+				wget https://nightly.link/ptitSeb/box86/actions/artifacts/148607181.zip #box86 (RPI4ARM64)
+				7z x 148608519.zip -o"/usr/local/bin/" #extract box64 to /usr/local/bin/box64
+				7z x 148607181.zip -o"/usr/local/bin/" #extract box86 to /usr/local/bin/box86
+				sudo chmod +x /usr/local/bin/box64 /usr/local/bin/box86 #make the extracted files executable
+				# Also install extra box86 i386 & box64 x86_64 libraries
+				git clone https://github.com/ptitSeb/box64.git; mkdir -p /usr/lib/x86_64-linux-gnu/ && cp box64/x64lib/* /usr/lib/x86_64-linux-gnu/
+				git clone https://github.com/ptitSeb/box86.git; mkdir -p /usr/lib/i386-linux-gnu/ && cp box86/x86lib/* /usr/lib/i386-linux-gnu/
+				rm -rf box64/ box86/
 			
 			# Install amd64-wine (64-bit) and i386-wine (32-bit)
-			sudo apt install libc6:armhf libx11-6:armhf libgdk-pixbuf2.0-0:armhf libgtk2.0-0:armhf libstdc++6:armhf libsdl2-2.0-0:armhf \
-				mesa-va-drivers:armhf libsdl1.2-dev:armhf libsdl-mixer1.2:armhf libpng16-16:armhf libcal3d12v5:armhf \
-				libsdl2-net-2.0-0:armhf libopenal1:armhf libsdl2-image-2.0-0:armhf libvorbis-dev:armhf libcurl4:armhf osspd:armhf \
-				pulseaudio:armhf libjpeg62:armhf libudev1:armhf libgl1-mesa-dev:armhf libsnappy1v5:armhf libx11-dev:armhf \
-				libsmpeg0:armhf libboost-filesystem1.67.0:armhf libboost-program-options1.67.0:armhf libavcodec58:armhf \
-				libavformat58:armhf libswscale5:armhf libmyguiengine3debian1v5:armhf libboost-iostreams1.67.0:armhf \
-				libsdl2-mixer-2.0-0:armhf -y
-				# libc6:armhf required. Unsure about the rest but works for i386-wine on aarch64. Credits: monkaBlyat (Dr. van RockPi) & Itai-Nelken.
-			sudo apt install libxinerama1 libfontconfig1 libxrender1 libxcomposite-dev libxi6 libxcursor-dev libxrandr2 libncurses6 -y # for wine on proot?
-			sudo apt install libc6:armhf libncurses5:armhf libstdc++6:armhf libfontconfig1:armhf libmpg123-0:armhf libcups2:armhf \
-				libncurses6:armhf libfreetype6:armhf libxcb1:armhf libxext6:armhf libxinerama1:armhf libxxf86vm1:armhf \
-				libxrender1:armhf libxcomposite1:armhf libxi6:armhf libxcursor1:armhf libxrandr2:armhf -y
-				#libc6:armhf is needed for box86 to be detected by aarch64 https://github.com/ptitSeb/box86/issues/465
-				#TODO: Go through this dependencies list and weed out un-needed libraries.
-			sudo apt install libcups2 -y #for box64
-			
+			#TODO: Go through this dependencies list and weed out un-needed libraries.
+				# libc6:armhf is needed for box86 to be detected by aarch64 https://github.com/ptitSeb/box86/issues/465
+				# Unsure about the rest but wine-amd64 & wine-i386 on aarch64 need some libs too.
+				# Credits: monkaBlyat (Dr. van RockPi) & Itai-Nelken.
+			sudo apt install libcups2 libfontconfig1 libncurses6 libxcomposite-dev libxcursor-dev libxi6 libxinerama1 libxrandr2 libxrender1 -y # for wine64
+			sudo apt install libavcodec58:armhf libavformat58:armhf libboost-filesystem1.67.0:armhf libboost-iostreams1.67.0:armhf \
+				libboost-program-options1.67.0:armhf libc6:armhf libcal3d12v5:armhf libcups2:armhf libcurl4:armhf libfontconfig1:armhf \
+				libfreetype6:armhf libgdk-pixbuf2.0-0:armhf libgl1-mesa-dev:armhf libgtk2.0-0:armhf libjpeg62:armhf libmpg123-0:armhf \
+				libmyguiengine3debian1v5:armhf libncurses5:armhf libncurses6:armhf libopenal1:armhf libpng16-16:armhf \
+				libsdl1.2-dev:armhf libsdl2-2.0-0:armhf libsdl2-image-2.0-0:armhf libsdl2-mixer-2.0-0:armhf libsdl2-net-2.0-0:armhf \
+				libsdl-mixer1.2:armhf libsmpeg0:armhf libsnappy1v5:armhf libstdc++6:armhf libswscale5:armhf libudev1:armhf \
+				libvorbis-dev:armhf libx11-6:armhf libx11-dev:armhf libxcb1:armhf libxcomposite1:armhf libxcursor1:armhf libxext6:armhf \
+				libxi6:armhf libxinerama1:armhf libxrandr2:armhf libxrender1:armhf libxxf86vm1:armhf mesa-va-drivers:armhf osspd:armhf \
+				pulseaudio:armhf -y # for wine on aarch64 (multiarch)
 			
 			mkdir downloads; cd downloads
 				# Wine download links from WineHQ: https://dl.winehq.org/wine-builds/
 				LNK1="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-amd64/"
-				DEB1="wine-stable-amd64_5.0.0~bullseye_amd64.deb"
-				DEB2="wine-stable_5.0.0~bullseye_amd64.deb"
-				DEB3="winehq-stable_5.0.0~bullseye_amd64.deb"
-				LNK2="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-i386/"
-				DEB4="wine-stable-i386_5.0.0~bullseye_i386.deb"
-				DEB5="wine-stable_5.0.0~bullseye_i386.deb"
-				DEB6="winehq-stable_5.0.0~bullseye_i386.deb"
-					#LNK1="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-amd64/"
+				DEB1="wine-stable-amd64_5.0.0~bullseye_amd64.deb" #wine64 supporting files
 					#DEB1="wine-stable-amd64_6.0.2~bullseye-1_amd64.deb"
+				DEB2="wine-stable_5.0.0~bullseye_amd64.deb" #wine64 main binary file
 					#DEB2="wine-stable_6.0.2~bullseye-1_amd64.deb"
-					#DEB3="winehq-stable_6.0.2~bullseye-1_amd64.deb"
-					#LNK2="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-i386/"
+				#DEB3="winehq-stable_5.0.0~bullseye_amd64.deb" #mostly contains desktop shortcuts and docs?
+				LNK2="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-i386/"
+				DEB4="wine-stable-i386_5.0.0~bullseye_i386.deb" #wine main binary file
 					#DEB4="wine-stable-i386_6.0.2~bullseye-1_i386.deb"
-					#DEB5="wine-stable_6.0.2~bullseye-1_i386.deb"
-					#DEB6="winehq-stable_6.0.2~bullseye-1_i386.deb"
+				#DEB5="wine-stable_5.0.0~bullseye_i386.deb" #wine supporting files - CONFLICTS WITH wine64 supporting files
+				#DEB6="winehq-stable_5.0.0~bullseye_i386.deb" #mostly contains desktop shortcuts and docs?
+					
 				# Download, extract wine, and install wine
 				echo "Downloading wine . . ."
 				wget ${LNK1}${DEB1} || echo "${DEB1} download failed!"
@@ -160,6 +156,7 @@ function run_InjectSecondStageInstaller()
 			echo >> ~/.bashrc "sudo Xephyr :1 -noreset -fullscreen &"
 			
 			# Make scripts and symlinks to transparently run wine with box86 (since we don't have binfmt_misc available)
+			# TODO: Create an alternative to binfmt on Termux using scripts (Termux does not support binfmt)
 			#echo -e '#!/bin/bash'"\nDISPLAY=:1 box64 $HOME/wine/bin/wine64" '"$@"' | sudo tee -a /usr/local/bin/wine64 >/dev/null
 			#echo -e '#!/bin/bash'"\nDISPLAY=:1 box86 $HOME/wine/bin/wine" '"$@"' | sudo tee -a /usr/local/bin/wine >/dev/null
 			#echo -e '#!/bin/bash'"\nbox64 $HOME/wine/bin/wineserver" '"$@"' | sudo tee -a /usr/local/bin/wineserver >/dev/null
@@ -184,7 +181,12 @@ function run_InjectSecondStageInstaller()
 				7z x npp.7.bin.x64.zip -o"npp64"
 				#DISPLAY=:1 /usr/local/bin/box64 /home/user/wine/bin/wine64 /home/user/npp64/notepad++.exe
 				#DISPLAY=:1 WINEPREFIX=~/.wine32/ /usr/local/bin/box86 /home/user/wine/bin/wine /home/user/npp32/notepad++.exe
-
+				
+				#TESTING: Download EarthSiege demo (free)
+				wget https://archive.org/download/es2demo/es2demo.exe
+				7z x es2demo.exe
+				7z x DATA.EXE
+				#DISPLAY=:1 WINEPREFIX=~/.wine32/ /usr/local/bin/box86 /home/user/wine/bin/wine /home/user/ES.EXE
 			
 			#TODO: Make this display whenever logging into proot 
 			echo -e "\nAnBox86 installation complete."
