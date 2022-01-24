@@ -98,7 +98,7 @@ function run_InjectSecondStageInstaller()
 				# Also install extra box86 i386 & box64 x86_64 libraries
 				git clone https://github.com/ptitSeb/box64.git; mkdir -p /usr/lib/x86_64-linux-gnu/ && cp box64/x64lib/* /usr/lib/x86_64-linux-gnu/
 				git clone https://github.com/ptitSeb/box86.git; mkdir -p /usr/lib/i386-linux-gnu/ && cp box86/x86lib/* /usr/lib/i386-linux-gnu/
-				rm -rf box64/ box86/
+				rm -rf box64/ box86/ 148608519.zip 148607181.zip
 			
 			# Install amd64-wine (64-bit) and i386-wine (32-bit)
 			#TODO: Go through this dependencies list and weed out un-needed libraries.
@@ -159,44 +159,45 @@ function run_InjectSecondStageInstaller()
 			
 			# Make scripts and symlinks to transparently run wine with box86 (since we don't have binfmt_misc available)
 			# TODO: Create an alternative to binfmt on Termux using scripts (Termux does not support binfmt)
-			#echo -e '#!/bin/bash'"\nDISPLAY=:1 box64 $HOME/wine/bin/wine64" '"$@"' | sudo tee -a /usr/local/bin/wine64 >/dev/null
-			#echo -e '#!/bin/bash'"\nDISPLAY=:1 box86 $HOME/wine/bin/wine" '"$@"' | sudo tee -a /usr/local/bin/wine >/dev/null
-			#echo -e '#!/bin/bash'"\nbox64 $HOME/wine/bin/wineserver" '"$@"' | sudo tee -a /usr/local/bin/wineserver >/dev/null
-			sudo ln -s $HOME/wine/bin/wine64 /usr/local/bin/wine64
-			sudo ln -s $HOME/wine/bin/wine /usr/local/bin/wine
-			sudo ln -s $HOME/wine/bin/wineserver /usr/local/bin/wineserver
+			echo -e '#!/bin/bash'"\nDISPLAY=:1 box64 $HOME/wine/bin/wine64" '"$@"' | sudo tee -a /usr/local/bin/wine64 >/dev/null
+			echo -e '#!/bin/bash'"\nDISPLAY=:1 WINEARCH=win32 box86 $HOME/wine/bin/wine" '"$@"' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e '#!/bin/bash'"\nbox64 $HOME/wine/bin/wineserver" '"$@"' | sudo tee -a /usr/local/bin/wineserver >/dev/null
+				#sudo ln -s $HOME/wine/bin/wine64 /usr/local/bin/wine64
+				#sudo ln -s $HOME/wine/bin/wine /usr/local/bin/wine
+				#sudo ln -s $HOME/wine/bin/wineserver /usr/local/bin/wineserver
 			sudo ln -s $HOME/wine/bin/wineboot /usr/local/bin/wineboot
 			sudo ln -s $HOME/wine/bin/winecfg /usr/local/bin/winecfg
-			#sudo chmod +x /usr/local/bin/wine64 /usr/local/bin/wine /usr/local/bin/wineboot /usr/local/bin/winecfg /usr/local/bin/wineserver
+			sudo chmod +x /usr/local/bin/wine64 /usr/local/bin/wine /usr/local/bin/wineboot /usr/local/bin/winecfg /usr/local/bin/wineserver
 			
 			# Install winetricks
-			sudo apt-get install wget cabextract -y # winetricks needs this
+			sudo apt-get install wget unzip cabextract -y # winetricks needs these
 			wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks # download
 			sudo chmod +x winetricks
 			sudo mv winetricks /usr/local/bin
 			
+			# Download some small programs for users to test things
 				#TESTING: Download notepad++ 32bit and 64bit to test
 				sudo apt install p7zip-full nano -y
 				wget https://notepad-plus-plus.org/repository/7.x/7.0/npp.7.bin.zip #32bit
 				wget https://notepad-plus-plus.org/repository/7.x/7.0/npp.7.bin.x64.zip #64bit
-				7z x npp.7.bin.zip -o"npp32"
-				7z x npp.7.bin.x64.zip -o"npp64"
-				#DISPLAY=:1 /usr/local/bin/box64 /home/user/wine/bin/wine64 /home/user/npp64/notepad++.exe
+				7z x npp.7.bin.zip -o"npp32" && rm npp.7.bin.zip
 				#DISPLAY=:1 WINEPREFIX=~/.wine32/ /usr/local/bin/box86 /home/user/wine/bin/wine /home/user/npp32/notepad++.exe
+				7z x npp.7.bin.x64.zip -o"npp64" && rm npp.7.bin.x64.zip
+				#DISPLAY=:1 /usr/local/bin/box64 /home/user/wine/bin/wine64 /home/user/npp64/notepad++.exe
 				
-				#TESTING: Download EarthSiege demo (free)
-				wget https://archive.org/download/es2demo/es2demo.exe
-				7z x es2demo.exe
-				7z x DATA.EXE
+				#TESTING: Download the EarthSiege 1 Demo
+				wget https://archive.org/download/es2demo/es2demo.exe #32bit
+				7z x es2demo.exe -o"EarthSiegeDemo" && rm es2demo.exe
+				7z x EarthSiegeDemo/DATA.EXE -o"EarthSiegeDemo" && rm EarthSiegeDemo/DATA.EXE
 				#DISPLAY=:1 WINEPREFIX=~/.wine32/ /usr/local/bin/box86 /home/user/wine/bin/wine /home/user/ES.EXE
-			
+				
 			#TODO: Make this display whenever logging into proot 
 			echo -e "\nAnBox86 installation complete."
 			echo " - From Termux, you can use launch_debian.sh to start Debian PRoot."
 			echo "    (we are currently inside Debian PRoot in a user account)"
 			echo " - Launch x64 programs from inside PRoot with 'wine64 YourWindowsProgram.exe' or 'box64 YourLinuxProgram'."
 			echo " - Launch x86 programs from inside PRoot with 'wine YourWindowsProgram.exe' or 'box86 YourLinuxProgram'."
-			echo "    (don't forget to use the BOX86_NOBANNER=1 environment variable when launching winetricks)"
+			echo " - Type 'BOX86_NOBANNER=1' whenever running winetricks)"
 			echo " - After PRoot launches a program, use the Android app 'XServer XSDL' to view & control it."
 			echo "    (if you get display errors, make sure the 'XServer XSDL' app is open and that Android didn't put it to sleep)"
 			#TODO: Find a way to launch xserver xsdl app from proot user acct - launch whenever wine is run
