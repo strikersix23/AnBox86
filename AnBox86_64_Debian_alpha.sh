@@ -115,7 +115,7 @@ function run_InjectSecondStageInstaller()
 				libvorbis-dev:armhf libx11-6:armhf libx11-dev:armhf libxcb1:armhf libxcomposite1:armhf libxcursor1:armhf libxext6:armhf \
 				libxi6:armhf libxinerama1:armhf libxrandr2:armhf libxrender1:armhf libxxf86vm1:armhf mesa-va-drivers:armhf osspd:armhf \
 				pulseaudio:armhf -y # for wine on aarch64 (multiarch)
-			sudo apt install libasound2:armhf libpulse0:armhf -y # fixes wine sound
+			sudo apt install libasound2:armhf libpulse0:armhf libxml2:armhf libxslt1.1:armhf libxslt1-dev:armhf -y # fixes wine sound
 			sudo apt install libpulse0 -y # not sure if needed, but can't hurt anything
 			
 			mkdir downloads; cd downloads
