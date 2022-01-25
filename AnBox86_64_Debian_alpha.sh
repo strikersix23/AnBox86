@@ -106,8 +106,8 @@ function run_InjectSecondStageInstaller()
 				# Unsure about the rest but wine-amd64 & wine-i386 on aarch64 need some libs too.
 				# Credits: monkaBlyat (Dr. van RockPi) & Itai-Nelken.
 			sudo apt install libcups2 libfontconfig1 libncurses6 libxcomposite-dev libxcursor-dev libxi6 libxinerama1 libxrandr2 libxrender1 -y # for wine64
-			sudo apt install libavcodec58:armhf libavformat58:armhf libboost-filesystem1.67.0:armhf libboost-iostreams1.67.0:armhf \
-				libboost-program-options1.67.0:armhf libc6:armhf libcal3d12v5:armhf libcups2:armhf libcurl4:armhf libfontconfig1:armhf \
+			sudo apt install libavcodec58:armhf libavformat58:armhf libboost-filesystem1.74.0:armhf libboost-iostreams1.74.0:armhf \
+				libboost-program-options1.74.0:armhf libc6:armhf libcal3d12v5:armhf libcups2:armhf libcurl4:armhf libfontconfig1:armhf \
 				libfreetype6:armhf libgdk-pixbuf2.0-0:armhf libgl1-mesa-dev:armhf libgtk2.0-0:armhf libjpeg62:armhf libmpg123-0:armhf \
 				libmyguiengine3debian1v5:armhf libncurses5:armhf libncurses6:armhf libopenal1:armhf libpng16-16:armhf \
 				libsdl1.2-dev:armhf libsdl2-2.0-0:armhf libsdl2-image-2.0-0:armhf libsdl2-mixer-2.0-0:armhf libsdl2-net-2.0-0:armhf \
