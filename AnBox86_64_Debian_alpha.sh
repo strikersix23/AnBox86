@@ -160,7 +160,25 @@ function run_InjectSecondStageInstaller()
 			# Make scripts and symlinks to transparently run wine with box86 (since we don't have binfmt_misc available)
 			# TODO: Create an alternative to binfmt on Termux using scripts (Termux does not support binfmt)
 			echo -e '#!/bin/bash'"\nDISPLAY=:1 box64 $HOME/wine/bin/wine64" '"$@"' | sudo tee -a /usr/local/bin/wine64 >/dev/null
-			echo -e '#!/bin/bash'"\nDISPLAY=:1 WINEARCH=win32 box86 $HOME/wine/bin/wine" '"$@"' | sudo tee -a /usr/local/bin/wine >/dev/null
+			
+			echo -e '#!/bin/bash' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e '' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e '# Launch the XServer XSDL Android app auto-magical-ly ("&" continue running more commands)' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e '#  - This step requires proot-distro to be started with some Termux directories bound' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e 'am start --user 0 -n x.org.server/x.org.server.RunFromOtherApp &' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e '' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e '# Initialize X server ("&" continue running more commands)' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e '#  - Note that envvar PULSE_SERVER is not needed (like XServer XSDL suggests) because Termux uses its own Pulseaudio package' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e 'DISPLAY=localhost:0 sudo Xephyr :1 -noreset -fullscreen &' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e '' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e '# When this wine script is called, launch wine desktop with box86 and pass arguments to wine (then wait for wine session to finish)' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e '# - TODO: find a way to detect device resolution and put that into here as a variable' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e "#DISPLAY=:1 WINEARCH=win32 box86 $HOME/wine/bin/wine explorer /desktop=wine,1920x1200" '"$@"' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e "DISPLAY=:1 WINEARCH=win32 box86 $HOME/wine/bin/wine" '"$@"' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e '' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e '# When the wine session is finished, switch back to the Termux Android app' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e 'am start --user 0 -n com.termux/com.termux.app.TermuxActivity' | sudo tee -a /usr/local/bin/wine >/dev/null
+			
 			echo -e '#!/bin/bash'"\nbox64 $HOME/wine/bin/wineserver" '"$@"' | sudo tee -a /usr/local/bin/wineserver >/dev/null
 				#sudo ln -s $HOME/wine/bin/wine64 /usr/local/bin/wine64
 				#sudo ln -s $HOME/wine/bin/wine /usr/local/bin/wine
