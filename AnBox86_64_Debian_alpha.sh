@@ -2,6 +2,7 @@
 
 ### AnBox86_64.sh
 # Authors: lowspecman420, WheezyE
+# Special thanks: michalbednarski, xeffyr, ZhymabekRoman, ptitSeb
 #
 # This script is made to be run by the Termux app (for Android devices).  It is recommended you download Termux from F-Droid rather than from the Google Play Store.
 # This script will install a PRoot guest system (Debian) in Termux.  Then it will install box86 and wine-i386 on that guest system.
@@ -162,11 +163,11 @@ function run_InjectSecondStageInstaller()
 			# TODO: Create an alternative to binfmt on Termux using scripts (Termux does not support binfmt)			
 			echo -e '#!/bin/bash' | sudo tee -a /usr/local/bin/wine64 >/dev/null
 			echo -e '' | sudo tee -a /usr/local/bin/wine64 >/dev/null
-			echo -e '# Launch the XServer XSDL Android app auto-magical-ly ("&" continue running more commands)' | sudo tee -a /usr/local/bin/wine64 >/dev/null
+			echo -e '# Launch the XServer XSDL Android app ("&" continue running more commands)' | sudo tee -a /usr/local/bin/wine64 >/dev/null
 			echo -e '#  - This step requires proot-distro to be started with some Termux directories bound' | sudo tee -a /usr/local/bin/wine64 >/dev/null
 			echo -e 'am start --user 0 -n x.org.server/x.org.server.RunFromOtherApp &' | sudo tee -a /usr/local/bin/wine64 >/dev/null
 			echo -e '' | sudo tee -a /usr/local/bin/wine64 >/dev/null
-			echo -e '# Initialize X server ("&" continue running more commands)' | sudo tee -a /usr/local/bin/wine64 >/dev/null
+			echo -e '# Initialize X server on screen 1 ("&" continue running more commands)' | sudo tee -a /usr/local/bin/wine64 >/dev/null
 			echo -e '#  - Note that envvar PULSE_SERVER is not needed (like XServer XSDL suggests) because Termux uses its own Pulseaudio package' | sudo tee -a /usr/local/bin/wine64 >/dev/null
 			echo -e 'DISPLAY=localhost:0 sudo Xephyr :1 -noreset -fullscreen &' | sudo tee -a /usr/local/bin/wine64 >/dev/null
 			echo -e '' | sudo tee -a /usr/local/bin/wine64 >/dev/null
@@ -180,11 +181,11 @@ function run_InjectSecondStageInstaller()
 			
 			echo -e '#!/bin/bash' | sudo tee -a /usr/local/bin/wine >/dev/null
 			echo -e '' | sudo tee -a /usr/local/bin/wine >/dev/null
-			echo -e '# Launch the XServer XSDL Android app auto-magical-ly ("&" continue running more commands)' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e '# Launch the XServer XSDL Android app ("&" continue running more commands)' | sudo tee -a /usr/local/bin/wine >/dev/null
 			echo -e '#  - This step requires proot-distro to be started with some Termux directories bound' | sudo tee -a /usr/local/bin/wine >/dev/null
 			echo -e 'am start --user 0 -n x.org.server/x.org.server.RunFromOtherApp &' | sudo tee -a /usr/local/bin/wine >/dev/null
 			echo -e '' | sudo tee -a /usr/local/bin/wine >/dev/null
-			echo -e '# Initialize X server ("&" continue running more commands)' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e '# Initialize X server on screen 1 ("&" continue running more commands)' | sudo tee -a /usr/local/bin/wine >/dev/null
 			echo -e '#  - Note that envvar PULSE_SERVER is not needed (like XServer XSDL suggests) because Termux uses its own Pulseaudio package' | sudo tee -a /usr/local/bin/wine >/dev/null
 			echo -e 'DISPLAY=localhost:0 sudo Xephyr :1 -noreset -fullscreen &' | sudo tee -a /usr/local/bin/wine >/dev/null
 			echo -e '' | sudo tee -a /usr/local/bin/wine >/dev/null
@@ -220,22 +221,23 @@ function run_InjectSecondStageInstaller()
 				7z x npp.7.bin.x64.zip -o"npp64" && rm npp.7.bin.x64.zip
 				#DISPLAY=:1 /usr/local/bin/box64 /home/user/wine/bin/wine64 /home/user/npp64/notepad++.exe
 				
-				#TESTING: Download the EarthSiege 1 Demo
+				#TESTING: Download the EarthSiege 2 Demo
+				# - NOTE: Users be in the same directory as ES.EXE when they run it with wine or else the game will crash.
 				wget https://archive.org/download/es2demo/es2demo.exe #32bit
 				7z x es2demo.exe -o"EarthSiegeDemo" && rm es2demo.exe
 				7z x EarthSiegeDemo/DATA.EXE -o"EarthSiegeDemo" && rm EarthSiegeDemo/DATA.EXE
 				#DISPLAY=:1 WINEPREFIX=~/.wine32/ /usr/local/bin/box86 /home/user/wine/bin/wine /home/user/ES.EXE
 				
-			#TODO: Make this display whenever logging into proot 
-			echo -e "\nAnBox86 installation complete."
-			echo " - From Termux, you can use launch_debian.sh to start Debian PRoot."
-			echo "    (we are currently inside Debian PRoot in a user account)"
-			echo " - Launch x64 programs from inside PRoot with 'wine64 YourWindowsProgram.exe' or 'box64 YourLinuxProgram'."
-			echo " - Launch x86 programs from inside PRoot with 'wine YourWindowsProgram.exe' or 'box86 YourLinuxProgram'."
-			echo " - Type 'BOX86_NOBANNER=1' whenever running winetricks)"
-			echo " - After PRoot launches a program, use the Android app 'XServer XSDL' to view & control it."
-			echo "    (if you get display errors, make sure the 'XServer XSDL' app is open and that Android didn't put it to sleep)"
-			#TODO: Find a way to launch xserver xsdl app from proot user acct - launch whenever wine is run
+			#TODO: Make this display whenever logging into proot
+			Cyan=$'\e[1;36m'
+			echo -e "$Cyan\nAnBox86 installation complete."
+			echo "$Cyan - From Termux, you can use launch_debian.sh to start Debian PRoot."
+			echo "$Cyan    (we are currently inside Debian PRoot in a user account)"
+			echo "$Cyan - Launch x64 programs from inside PRoot with 'wine64 YourWindowsProgram.exe' or 'box64 YourLinuxProgram'."
+			echo "$Cyan - Launch x86 programs from inside PRoot with 'wine YourWindowsProgram.exe' or 'box86 YourLinuxProgram'."
+			echo "$Cyan - Type 'BOX86_NOBANNER=1' whenever running winetricks)"
+			echo "$Cyan - After PRoot launches a program, use the Android app 'XServer XSDL' to view & control it."
+			echo "$Cyan    (should launch automatically)"
 		EOT
 		# The above commands were pushed into the 'user' account while we were in 'root'. So now that these commands are done, we will still be in 'root'.
 		# Let's tell bash to log into the 'user' account as our final action.
