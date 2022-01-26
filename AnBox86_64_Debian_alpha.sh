@@ -32,7 +32,7 @@ function run_Main()
 	# Create a script to log into PRoot as the 'user' account (which we will create later)
 	echo >> launch_debian.sh "#!/bin/bash"
 	echo >> launch_debian.sh ""
-	echo >> launch_debian.sh "proot-distro login --isolated --shared-tmp debian -- su - user" # '--isolated' avoids program conflicts between Termux & PRoot (credits: Mipster)
+	echo >> launch_debian.sh "proot-distro login --bind /system/ --bind /data/data/com.termux/files/usr/bin --bind /data/data/com.termux/files/usr/libexec/termux-am --isolated --shared-tmp debian -- su - user" # '--isolated' avoids program conflicts between Termux & PRoot (credits: Mipster)
 	chmod +x launch_debian.sh
 	
 	# Inject a 'second stage' installer script into Debian
@@ -41,7 +41,7 @@ function run_Main()
 	
 	# Log into PRoot (which will then launch the 'second stage' installer)
 	echo -e "\nDebian PRoot guest system installed. Launching Debian PRoot and continuing installation. . ."
-	proot-distro login --isolated --shared-tmp debian # Log into the Debian PRoot as 'root'.
+	proot-distro login --bind /system/ --bind /data/data/com.termux/files/usr/bin --bind /data/data/com.termux/files/usr/libexec/termux-am --isolated --shared-tmp debian # Log into the Debian PRoot as 'root'. Enable binds to launch Android apps. Isolate for wine
 }
 
 # ---------------
@@ -53,7 +53,7 @@ function run_InjectSecondStageInstaller()
 		#!/bin/bash
 		# Second stage installer script
 		#  - Because this script is located within '/etc/profile.d/', bash will auto-run it upon any login into PRoot ('root' or 'user').
-		echo -e "\nPRoot launch successful.  Now installing Box86 and Wine on Debian PRoot. . ."
+		echo -e "\nPRoot launch successful.  Now installing Box86/Box64 and Wine/Wine64 on Debian PRoot. . ."
 		
 		# Script self-destruct (since this setup script should only be run once)
 		#  - Upon first PRoot login, bash will load these commands into memory, delete this script file, then run the rest of the commands.
@@ -106,7 +106,7 @@ function run_InjectSecondStageInstaller()
 				# libc6:armhf is needed for box86 to be detected by aarch64 https://github.com/ptitSeb/box86/issues/465
 				# Unsure about the rest but wine-amd64 & wine-i386 on aarch64 need some libs too.
 				# Credits: monkaBlyat (Dr. van RockPi) & Itai-Nelken.
-			sudo apt install libcups2 libfontconfig1 libncurses6 libxcomposite-dev libxcursor-dev libxi6 libxinerama1 libxrandr2 libxrender1 -y # for wine64
+			sudo apt install apt-utils libcups2 libfontconfig1 libncurses6 libxcomposite-dev libxcursor-dev libxi6 libxinerama1 libxrandr2 libxrender1 -y # for wine64
 			sudo apt install libavcodec58:armhf libavformat58:armhf libboost-filesystem1.74.0:armhf libboost-iostreams1.74.0:armhf \
 				libboost-program-options1.74.0:armhf libc6:armhf libcal3d12v5:armhf libcups2:armhf libcurl4:armhf libfontconfig1:armhf \
 				libfreetype6:armhf libgdk-pixbuf2.0-0:armhf libgl1-mesa-dev:armhf libgtk2.0-0:armhf libjpeg62:armhf libmpg123-0:armhf \
@@ -157,6 +157,19 @@ function run_InjectSecondStageInstaller()
 			echo -e >> ~/.bashrc "\n# Initialize X server every time user logs in"
 			echo >> ~/.bashrc "export DISPLAY=localhost:0"
 			echo >> ~/.bashrc "sudo Xephyr :1 -noreset -fullscreen &"
+			echo >> ~/.bashrc ""
+			echo "Cyan=$'\e[1;36m'" | sudo tee -a ~/.bashrc >/dev/null
+			echo "White=$'\e[1;37m'" | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan}Welcome to AnBox86_64"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo ""' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} We are currently inside a user account within a Debian PRoot within Termux"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} - Launch x64 programs from inside PRoot with ${White}wine64 YourWindowsProgram.exe${Cyan} or ${White}box64 YourLinuxProgram${Cyan}."' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} - Launch x86 programs from inside PRoot with ${White}wine YourWindowsProgram.exe${Cyan} or ${White}box86 YourLinuxProgram${Cyan}."' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} - Type ${White}BOX86_NOBANNER=1${Cyan} whenever running winetricks"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan}    (winetricks is currently a bit broken though)"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} - After PRoot launches a program, use the XServer XSDL Android app to view & control it."' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan}    (should launch automatically)"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} - If you exit to Termux, you can use launch_debian.sh to start this Debian PRoot again."' | sudo tee -a ~/.bashrc >/dev/null
 			
 			# Make scripts and symlinks to transparently run wine with box86 (since we don't have binfmt_misc available)
 			# TODO: These wine/wine64 launcher scripts cause winetricks to fail - no workaround found (if/then statements don't work either)
