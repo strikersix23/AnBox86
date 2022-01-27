@@ -14,7 +14,7 @@ function run_Main()
 	rm AnBox86_64.sh # self-destruct (since this script should only be run once)
 	
         # Enable left & right keys in Termux (optional) - https://www.learntermux.tech/2020/01/how-to-enable-extra-keys-in-termux.html
-	mkdir $HOME/.termux/
+	mkdir $HOME/.termux/ 2>/dev/null
 	echo "extra-keys = [['ESC','/','-','HOME','UP','END'],['TAB','CTRL','ALT','LEFT','DOWN','RIGHT']]" >> $HOME/.termux/termux.properties
 	termux-reload-settings
 	
@@ -90,6 +90,7 @@ function run_InjectSecondStageInstaller()
 			# Download and install box64 & box86 (fast, but builds can be old and links could break)
 				# RPi4ARM64 builds for box64 & box86 seem to work on AArch64 Termux Debian PRoot
 				# Box86/box64 binaries are from GitHub "Actions" build artifacts, linked to via www.nightly.link
+				# TODO: Add error checking and compile is link is broken
 				sudo apt install p7zip-full wget git -y
 				wget https://nightly.link/ptitSeb/box64/actions/artifacts/148608519.zip #box64 (RPI4ARM64)
 				wget https://nightly.link/ptitSeb/box86/actions/artifacts/148607181.zip #box86 (RPI4ARM64)
@@ -105,7 +106,7 @@ function run_InjectSecondStageInstaller()
 			#TODO: Go through this dependencies list and weed out un-needed libraries.
 				# libc6:armhf is needed for box86 to be detected by aarch64 https://github.com/ptitSeb/box86/issues/465
 				# Unsure about the rest but wine-amd64 & wine-i386 on aarch64 need some libs too.
-				# Credits: monkaBlyat (Dr. van RockPi) & Itai-Nelken.
+				# Credits: monkaBlyat (Dr. van RockPi), Itai-Nelken, & WheezyE
 			sudo apt install apt-utils libcups2 libfontconfig1 libncurses6 libxcomposite-dev libxcursor-dev libxi6 libxinerama1 libxrandr2 libxrender1 -y # for wine64
 			sudo apt install libavcodec58:armhf libavformat58:armhf libboost-filesystem1.74.0:armhf libboost-iostreams1.74.0:armhf \
 				libboost-program-options1.74.0:armhf libc6:armhf libcal3d12v5:armhf libcups2:armhf libcurl4:armhf libfontconfig1:armhf \
@@ -121,6 +122,7 @@ function run_InjectSecondStageInstaller()
 			
 			mkdir downloads; cd downloads
 				# Wine download links from WineHQ: https://dl.winehq.org/wine-builds/
+				# TODO: Update wine to 6.0 or higher - check box86 compatability
 				LNK1="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-amd64/"
 				DEB1="wine-stable-amd64_5.0.0~bullseye_amd64.deb" #wine64 supporting files
 					#DEB1="wine-stable-amd64_6.0.2~bullseye-1_amd64.deb"
@@ -243,20 +245,8 @@ function run_InjectSecondStageInstaller()
 			echo 'echo "${Cyan}    (should launch automatically)"' | sudo tee -a ~/.bashrc >/dev/null
 			echo 'echo "${Cyan} - If you exit to Termux, you can use launch_debian.sh to start this Debian PRoot again."' | sudo tee -a ~/.bashrc >/dev/null
 			
-			# Display instructions for user right now too
 			Green=$'\e[1;32m'
-			Cyan=$'\e[1;36m'
-			White=$'\e[1;37m'
-			echo -e "$Green\nAnBox86_64 installation complete."
-			echo ""
-			echo "${Cyan} We are currently inside a user account within a Debian PRoot within Termux"
-			echo "${Cyan} - Launch x64 programs from inside PRoot with ${White}wine64 YourWindowsProgram.exe${Cyan} or ${White}box64 YourLinuxProgram${Cyan}."
-			echo "${Cyan} - Launch x86 programs from inside PRoot with ${White}wine YourWindowsProgram.exe${Cyan} or ${White}box86 YourLinuxProgram${Cyan}."
-			echo "${Cyan} - Type ${White}BOX86_NOBANNER=1${Cyan} whenever running winetricks"
-			echo "${Cyan}    (winetricks is currently a bit broken though)"
-			echo "${Cyan} - After PRoot launches a program, use the XServer XSDL Android app to view & control it."
-			echo "${Cyan}    (should launch automatically)"
-			echo "${Cyan} - If you exit to Termux, you can use launch_debian.sh to start this Debian PRoot again."
+			echo -e "$Green\nAnBox86_64 installation complete.\n"
 			
 		EOT
 		# The above commands were pushed into the 'user' account while we were in 'root'. So now that these commands are done, we will still be in 'root'.
