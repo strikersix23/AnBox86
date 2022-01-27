@@ -243,8 +243,8 @@ function run_InjectSecondStageInstaller()
 			echo 'echo "${Cyan}Running programs:"' | sudo tee -a ~/.bashrc >/dev/null
 			echo 'echo "${Cyan} * Launch x64 programs: ${White}wine64 YourWindowsProgram.exe${Cyan} or ${White}box64 YourLinuxProgram${Cyan}."' | sudo tee -a ~/.bashrc >/dev/null
 			echo 'echo "${Cyan} * Launch x86 programs: ${White}wine YourWindowsProgram.exe${Cyan} or ${White}box86 YourLinuxProgram${Cyan}."' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan} * Type ${White}BOX86_NOBANNER=1${Cyan} whenever running winetricks"' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan}    (winetricks is currently a bit broken though)"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} * Launch winetricks: ${White}BOX86_NOBANNER=1 winetricks${Cyan} or ${White}BOX64_NOBANNER=1 winetricks${Cyan}"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan}    (winetricks is currently a bit broken in AnBox86_64)"' | sudo tee -a ~/.bashrc >/dev/null
 			echo 'echo "${Cyan} * After PRoot launches a program, use the XServer XSDL Android app to view & control it."' | sudo tee -a ~/.bashrc >/dev/null
 			echo 'echo "${Cyan}    (should launch automatically)"' | sudo tee -a ~/.bashrc >/dev/null
 			echo 'echo ""' | sudo tee -a ~/.bashrc >/dev/null
