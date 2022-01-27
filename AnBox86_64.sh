@@ -30,10 +30,10 @@ function run_Main()
 	proot-distro install debian
 	
 	# Create a script to log into PRoot as the 'user' account (which we will create later)
-	echo >> launch_debian.sh "#!/bin/bash"
-	echo >> launch_debian.sh ""
-	echo >> launch_debian.sh "proot-distro login --bind /system/ --bind /data/data/com.termux/files/usr/bin --bind /data/data/com.termux/files/usr/libexec/termux-am --isolated --shared-tmp debian -- su - user" # '--isolated' avoids program conflicts between Termux & PRoot (credits: Mipster)
-	chmod +x launch_debian.sh
+	echo >> launch_anbox86-64.sh "#!/bin/bash"
+	echo >> launch_anbox86-64.sh ""
+	echo >> launch_anbox86-64.sh "proot-distro login --bind /system/ --bind /data/data/com.termux/files/usr/bin --bind /data/data/com.termux/files/usr/libexec/termux-am --isolated --shared-tmp debian -- su - user" # '--isolated' avoids program conflicts between Termux & PRoot (credits: Mipster)
+	chmod +x launch_anbox86-64.sh
 	
 	# Inject a 'second stage' installer script into Debian
 	# - This script will not be run right now.  It will be auto-run upon first login (since it is located within '/etc/profile.d/').
@@ -234,16 +234,22 @@ function run_InjectSecondStageInstaller()
 			# Display instructions whenever logging into proot
 			echo "Cyan=$'\e[1;36m'" | sudo tee -a ~/.bashrc >/dev/null
 			echo "White=$'\e[1;37m'" | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan}Welcome to AnBox86_64"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan}Welcome to AnBox86_64!"' | sudo tee -a ~/.bashrc >/dev/null
 			echo 'echo ""' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan} We are currently inside a user account within a Debian PRoot within Termux"' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan} - Launch x64 programs from inside PRoot with ${White}wine64 YourWindowsProgram.exe${Cyan} or ${White}box64 YourLinuxProgram${Cyan}."' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan} - Launch x86 programs from inside PRoot with ${White}wine YourWindowsProgram.exe${Cyan} or ${White}box86 YourLinuxProgram${Cyan}."' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan} - Type ${White}BOX86_NOBANNER=1${Cyan} whenever running winetricks"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan}PRoot runs within Termux and allows us to use box86/box64 & wine:"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} * We are currently inside a PRoot (in a user account, within a Debian PRoot, within Termux, on Android)"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} * If you exit this PRoot and go back to Termux, you can use launch_anbox86-64.sh to start this PRoot again."' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo ""' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan}Running programs:"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} * Launch x64 programs: ${White}wine64 YourWindowsProgram.exe${Cyan} or ${White}box64 YourLinuxProgram${Cyan}."' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} * Launch x86 programs: ${White}wine YourWindowsProgram.exe${Cyan} or ${White}box86 YourLinuxProgram${Cyan}."' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} * Type ${White}BOX86_NOBANNER=1${Cyan} whenever running winetricks"' | sudo tee -a ~/.bashrc >/dev/null
 			echo 'echo "${Cyan}    (winetricks is currently a bit broken though)"' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan} - After PRoot launches a program, use the XServer XSDL Android app to view & control it."' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} * After PRoot launches a program, use the XServer XSDL Android app to view & control it."' | sudo tee -a ~/.bashrc >/dev/null
 			echo 'echo "${Cyan}    (should launch automatically)"' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan} - If you exit to Termux, you can use launch_debian.sh to start this Debian PRoot again."' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo ""' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan}Report issues at https://github.com/lowspecman420/AnBox86"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo ""' | sudo tee -a ~/.bashrc >/dev/null
 			
 			Green=$'\e[1;32m'
 			echo -e "$Green\nAnBox86_64 installation complete.\n"
