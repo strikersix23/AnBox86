@@ -158,18 +158,6 @@ function run_InjectSecondStageInstaller()
 			echo >> ~/.bashrc "export DISPLAY=localhost:0"
 			echo >> ~/.bashrc "sudo Xephyr :1 -noreset -fullscreen &"
 			echo >> ~/.bashrc ""
-			echo "Cyan=$'\e[1;36m'" | sudo tee -a ~/.bashrc >/dev/null
-			echo "White=$'\e[1;37m'" | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan}Welcome to AnBox86_64"' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo ""' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan} We are currently inside a user account within a Debian PRoot within Termux"' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan} - Launch x64 programs from inside PRoot with ${White}wine64 YourWindowsProgram.exe${Cyan} or ${White}box64 YourLinuxProgram${Cyan}."' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan} - Launch x86 programs from inside PRoot with ${White}wine YourWindowsProgram.exe${Cyan} or ${White}box86 YourLinuxProgram${Cyan}."' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan} - Type ${White}BOX86_NOBANNER=1${Cyan} whenever running winetricks"' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan}    (winetricks is currently a bit broken though)"' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan} - After PRoot launches a program, use the XServer XSDL Android app to view & control it."' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan}    (should launch automatically)"' | sudo tee -a ~/.bashrc >/dev/null
-			echo 'echo "${Cyan} - If you exit to Termux, you can use launch_debian.sh to start this Debian PRoot again."' | sudo tee -a ~/.bashrc >/dev/null
 			
 			# Make scripts and symlinks to transparently run wine with box86 (since we don't have binfmt_misc available)
 			# TODO: These wine/wine64 launcher scripts cause winetricks to fail - no workaround found (if/then statements don't work either)
@@ -240,17 +228,36 @@ function run_InjectSecondStageInstaller()
 				7z x es2demo.exe -o"EarthSiegeDemo" && rm es2demo.exe
 				7z x EarthSiegeDemo/DATA.EXE -o"EarthSiegeDemo" && rm EarthSiegeDemo/DATA.EXE
 				#DISPLAY=:1 WINEPREFIX=~/.wine32/ /usr/local/bin/box86 /home/user/wine/bin/wine /home/user/ES.EXE
-				
-			#TODO: Make this display whenever logging into proot
+			
+			# Display instructions whenever logging into proot
+			echo "Cyan=$'\e[1;36m'" | sudo tee -a ~/.bashrc >/dev/null
+			echo "White=$'\e[1;37m'" | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan}Welcome to AnBox86_64"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo ""' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} We are currently inside a user account within a Debian PRoot within Termux"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} - Launch x64 programs from inside PRoot with ${White}wine64 YourWindowsProgram.exe${Cyan} or ${White}box64 YourLinuxProgram${Cyan}."' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} - Launch x86 programs from inside PRoot with ${White}wine YourWindowsProgram.exe${Cyan} or ${White}box86 YourLinuxProgram${Cyan}."' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} - Type ${White}BOX86_NOBANNER=1${Cyan} whenever running winetricks"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan}    (winetricks is currently a bit broken though)"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} - After PRoot launches a program, use the XServer XSDL Android app to view & control it."' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan}    (should launch automatically)"' | sudo tee -a ~/.bashrc >/dev/null
+			echo 'echo "${Cyan} - If you exit to Termux, you can use launch_debian.sh to start this Debian PRoot again."' | sudo tee -a ~/.bashrc >/dev/null
+			
+			# Display instructions for user right now too
+			Green=$'\e[1;32m'
 			Cyan=$'\e[1;36m'
-			echo -e "$Cyan\nAnBox86 installation complete."
-			echo "$Cyan - From Termux, you can use launch_debian.sh to start Debian PRoot."
-			echo "$Cyan    (we are currently inside Debian PRoot in a user account)"
-			echo "$Cyan - Launch x64 programs from inside PRoot with 'wine64 YourWindowsProgram.exe' or 'box64 YourLinuxProgram'."
-			echo "$Cyan - Launch x86 programs from inside PRoot with 'wine YourWindowsProgram.exe' or 'box86 YourLinuxProgram'."
-			echo "$Cyan - Type 'BOX86_NOBANNER=1' whenever running winetricks)"
-			echo "$Cyan - After PRoot launches a program, use the Android app 'XServer XSDL' to view & control it."
-			echo "$Cyan    (should launch automatically)"
+			White=$'\e[1;37m'
+			echo -e "$Green\nAnBox86_64 installation complete."
+			echo ""
+			echo "${Cyan} We are currently inside a user account within a Debian PRoot within Termux"
+			echo "${Cyan} - Launch x64 programs from inside PRoot with ${White}wine64 YourWindowsProgram.exe${Cyan} or ${White}box64 YourLinuxProgram${Cyan}."
+			echo "${Cyan} - Launch x86 programs from inside PRoot with ${White}wine YourWindowsProgram.exe${Cyan} or ${White}box86 YourLinuxProgram${Cyan}."
+			echo "${Cyan} - Type ${White}BOX86_NOBANNER=1${Cyan} whenever running winetricks"
+			echo "${Cyan}    (winetricks is currently a bit broken though)"
+			echo "${Cyan} - After PRoot launches a program, use the XServer XSDL Android app to view & control it."
+			echo "${Cyan}    (should launch automatically)"
+			echo "${Cyan} - If you exit to Termux, you can use launch_debian.sh to start this Debian PRoot again."
+			
 		EOT
 		# The above commands were pushed into the 'user' account while we were in 'root'. So now that these commands are done, we will still be in 'root'.
 		# Let's tell bash to log into the 'user' account as our final action.
