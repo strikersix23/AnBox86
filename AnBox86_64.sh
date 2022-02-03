@@ -13,7 +13,7 @@ function run_Main()
 {
 	rm AnBox86_64.sh 2>/dev/null # self-destruct (since this script should only be run once)
 	
-        # Enable left & right keys in Termux (optional) - https://www.learntermux.tech/2020/01/how-to-enable-extra-keys-in-termux.html
+	# Enable left & right keys in Termux (optional) - https://www.learntermux.tech/2020/01/how-to-enable-extra-keys-in-termux.html
 	mkdir $HOME/.termux/ 2>/dev/null
 	echo "extra-keys = [['ESC','/','-','HOME','UP','END'],['TAB','CTRL','ALT','LEFT','DOWN','RIGHT']]" >> $HOME/.termux/termux.properties
 	termux-reload-settings
@@ -214,8 +214,8 @@ function run_InjectSecondStageInstaller()
 			sudo chmod +x winetricks
 			sudo mv winetricks /usr/local/bin
 			
-			# Download some small programs for users to test things
-				#TESTING: Download notepad++ 32bit and 64bit to test
+			# Download small x86/x64 programs for testing (optional)
+				#Download notepad++ 32bit and 64bit to test
 				sudo apt install p7zip-full nano -y
 				wget https://notepad-plus-plus.org/repository/7.x/7.0/npp.7.bin.zip #32bit
 				wget https://notepad-plus-plus.org/repository/7.x/7.0/npp.7.bin.x64.zip #64bit
@@ -224,8 +224,8 @@ function run_InjectSecondStageInstaller()
 				7z x npp.7.bin.x64.zip -o"npp64" && rm npp.7.bin.x64.zip
 				#DISPLAY=:1 /usr/local/bin/box64 /home/user/wine/bin/wine64 /home/user/npp64/notepad++.exe
 				
-				#TESTING: Download the EarthSiege 2 Demo
-				# - NOTE: Users be in the same directory as ES.EXE when they run it with wine or else the game will crash.
+				#Download the EarthSiege 2 Demo
+				# NOTE: Users must be in the same directory as ES.EXE when they run it with wine (or else the game will crash)
 				wget https://archive.org/download/es2demo/es2demo.exe #32bit
 				7z x es2demo.exe -o"EarthSiegeDemo" && rm es2demo.exe
 				7z x EarthSiegeDemo/DATA.EXE -o"EarthSiegeDemo" && rm EarthSiegeDemo/DATA.EXE
