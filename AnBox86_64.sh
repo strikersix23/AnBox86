@@ -123,17 +123,18 @@ function run_InjectSecondStageInstaller()
 			mkdir downloads; cd downloads
 				# Wine download links from WineHQ: https://dl.winehq.org/wine-builds/
 				# TODO: Update wine to 6.0 or higher - check box86 compatability
+				branch="devel"
+				version="7.1"
+				dist="bullseye"
+				tag="-1"
 				LNK1="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-amd64/"
-				DEB1="wine-stable-amd64_5.0.0~bullseye_amd64.deb" #wine64 supporting files
-					#DEB1="wine-stable-amd64_6.0.2~bullseye-1_amd64.deb"
-				DEB2="wine-stable_5.0.0~bullseye_amd64.deb" #wine64 main binary file
-					#DEB2="wine-stable_6.0.2~bullseye-1_amd64.deb"
-				#DEB3="winehq-stable_5.0.0~bullseye_amd64.deb" #mostly contains desktop shortcuts and docs?
+				DEB1="wine-${branch}-amd64_${version}~${dist}${tag}_amd64.deb" #wine64 supporting files
+				DEB2="wine-${branch}_${version}~${dist}${tag}_amd64.deb" #wine64 main binary file
+				#DEB3="winehq-${branch}_${version}~${dist}${tag}_amd64.deb" #mostly contains desktop shortcuts and docs?
 				LNK2="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-i386/"
-				DEB4="wine-stable-i386_5.0.0~bullseye_i386.deb" #wine main binary file
-					#DEB4="wine-stable-i386_6.0.2~bullseye-1_i386.deb"
-				#DEB5="wine-stable_5.0.0~bullseye_i386.deb" #wine supporting files - CONFLICTS WITH wine64 supporting files
-				#DEB6="winehq-stable_5.0.0~bullseye_i386.deb" #mostly contains desktop shortcuts and docs?
+				DEB4="wine-${branch}-i386_${version}~${dist}${tag}_i386.deb" #wine main binary file
+				#DEB5="wine-${branch}_${version}~${dist}${tag}_i386.deb" #wine supporting files - CONFLICTS WITH wine64 supporting files
+				#DEB6="winehq-${branch}_${version}~${dist}${tag}_i386.deb" #mostly contains desktop shortcuts and docs?
 					
 				# Download, extract wine, and install wine
 				echo "Downloading wine . . ."
