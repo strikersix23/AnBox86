@@ -1,4 +1,4 @@
-# Anbox86
+# AnBox86
 
 A script to install box86/box64 and wine/wine64 on a termux proot for arm64 Android devices.
 
@@ -12,6 +12,9 @@ A script to install box86/box64 and wine/wine64 on a termux proot for arm64 Andr
 ```bash
 curl https://raw.githubusercontent.com/WheezyE/AnBox86/main/AnBox86_64.sh | bash
 ```
+
+4- Run `./launch_anbox_86-64.sh` to launch AnBox86_64
+
 
 # Projects used
 
