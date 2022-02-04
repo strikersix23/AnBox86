@@ -157,9 +157,9 @@ function run_InjectSecondStageInstaller()
 			
 			# Give PRoot an X server ('screen 1') to send video to (and don't stop the X server after last client logs off)
 			sudo apt install xserver-xephyr -y
-			echo -e >> ~/.bashrc "\n# Initialize X server every time user logs in"
+			echo -e >> ~/.bashrc "\n# Silently initialize X server every time user logs in"
 			echo >> ~/.bashrc "export DISPLAY=localhost:0"
-			echo >> ~/.bashrc "sudo Xephyr :1 -noreset -fullscreen &"
+			echo >> ~/.bashrc "sudo Xephyr :1 -noreset -fullscreen 2>/dev/null &"
 			echo >> ~/.bashrc ""
 			
 			# Make scripts and symlinks to transparently run wine with box86 (since we don't have binfmt_misc available)
@@ -173,7 +173,7 @@ function run_InjectSecondStageInstaller()
 			echo -e '' | sudo tee -a /usr/local/bin/wine64 >/dev/null
 			echo -e '# Initialize X server on screen 1 ("&" continue running more commands)' | sudo tee -a /usr/local/bin/wine64 >/dev/null
 			echo -e '#  - Note that envvar PULSE_SERVER is not needed (like XServer XSDL suggests) because Termux uses its own Pulseaudio package' | sudo tee -a /usr/local/bin/wine64 >/dev/null
-			echo -e 'DISPLAY=localhost:0 sudo Xephyr :1 -noreset -fullscreen &' | sudo tee -a /usr/local/bin/wine64 >/dev/null
+			echo -e 'DISPLAY=localhost:0 sudo Xephyr :1 -noreset -fullscreen 2>/dev/null &' | sudo tee -a /usr/local/bin/wine64 >/dev/null
 			echo -e '' | sudo tee -a /usr/local/bin/wine64 >/dev/null
 			echo -e '# When this wine script is called, launch wine desktop with box64 and pass arguments to wine (then wait for wine session to finish)' | sudo tee -a /usr/local/bin/wine64 >/dev/null
 			echo -e '# - TODO: find a way to detect device resolution and put that into here as a variable' | sudo tee -a /usr/local/bin/wine64 >/dev/null
@@ -191,7 +191,7 @@ function run_InjectSecondStageInstaller()
 			echo -e '' | sudo tee -a /usr/local/bin/wine >/dev/null
 			echo -e '# Initialize X server on screen 1 ("&" continue running more commands)' | sudo tee -a /usr/local/bin/wine >/dev/null
 			echo -e '#  - Note that envvar PULSE_SERVER is not needed (like XServer XSDL suggests) because Termux uses its own Pulseaudio package' | sudo tee -a /usr/local/bin/wine >/dev/null
-			echo -e 'DISPLAY=localhost:0 sudo Xephyr :1 -noreset -fullscreen &' | sudo tee -a /usr/local/bin/wine >/dev/null
+			echo -e 'DISPLAY=localhost:0 sudo Xephyr :1 -noreset -fullscreen 2>/dev/null &' | sudo tee -a /usr/local/bin/wine >/dev/null
 			echo -e '' | sudo tee -a /usr/local/bin/wine >/dev/null
 			echo -e '# When this wine script is called, launch wine desktop with box86 and pass arguments to wine (then wait for wine session to finish)' | sudo tee -a /usr/local/bin/wine >/dev/null
 			echo -e '# - TODO: find a way to detect device resolution and put that into here as a variable' | sudo tee -a /usr/local/bin/wine >/dev/null
