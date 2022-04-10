@@ -128,8 +128,8 @@ function run_InjectSecondStageInstaller()
 				dist="bullseye"
 				tag="-1"
 				LNK1="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-amd64/"
-				DEB1="wine-${branch}-amd64_${version}~${dist}${tag}_amd64.deb" #wine64 supporting files
-				DEB2="wine-${branch}_${version}~${dist}${tag}_amd64.deb" #wine64 main binary file
+				DEB1="wine-${branch}-amd64_${version}~${dist}${tag}_amd64.deb" #wine64 main binary file
+				DEB2="wine-${branch}_${version}~${dist}${tag}_amd64.deb" #wine64 supporting files
 				#DEB3="winehq-${branch}_${version}~${dist}${tag}_amd64.deb" #mostly contains desktop shortcuts and docs?
 				LNK2="https://dl.winehq.org/wine-builds/debian/dists/bullseye/main/binary-i386/"
 				DEB4="wine-${branch}-i386_${version}~${dist}${tag}_i386.deb" #wine main binary file
