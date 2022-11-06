@@ -25,12 +25,12 @@ function run_Main()
 	
 	# Create the Ubuntu PRoot within Termux
 	pkg install proot-distro git -y # F-Droid termux crashes with apt install proot-distro
-	proot-distro install ubuntu-20.04
+	proot-distro install ubuntu
 	
 	# Create a script to log into PRoot as the 'user' account (which we will create later)
 	echo >> launch_ubuntu.sh "#!/bin/bash"
 	echo >> launch_ubuntu.sh ""
-	echo >> launch_ubuntu.sh "proot-distro login --isolated ubuntu-20.04 -- su - user" # '--isolated' avoids program conflicts between Termux & PRoot (credits: Mipster)
+	echo >> launch_ubuntu.sh "proot-distro login --isolated ubuntu -- su - user" # '--isolated' avoids program conflicts between Termux & PRoot (credits: Mipster)
 	chmod +x launch_ubuntu.sh
 	
 	# Inject a 'second stage' installer script into Ubuntu
@@ -39,7 +39,7 @@ function run_Main()
 	
 	# Log into PRoot (which will then launch the 'second stage' installer)
 	echo -e "\nUbunutu PRoot guest system installed. Launching PRoot to continue the installation. . ."
-	proot-distro login --isolated ubuntu-20.04 # Log into the Ubuntu PRoot as 'root'.
+	proot-distro login --isolated ubuntu # Log into the Ubuntu PRoot as 'root'.
 }
 
 # ---------------
@@ -47,7 +47,7 @@ function run_Main()
 function run_InjectSecondStageInstaller()
 {
 	# Inject the 'second stage' installer script into the Ubuntu guest system to be run laterb (none of this gets run right now)
-	cat > $PREFIX/var/lib/proot-distro/installed-rootfs/ubuntu-20.04/etc/profile.d/AnBox64b.sh <<- 'EOM'
+	cat > $PREFIX/var/lib/proot-distro/installed-rootfs/ubuntu/etc/profile.d/AnBox64b.sh <<- 'EOM'
 		#!/bin/bash
 		# Second stage installer script
 		#  - Because this script is located within '/etc/profile.d/', bash will auto-run it upon any login into PRoot ('root' or 'user').
